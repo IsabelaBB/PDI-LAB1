@@ -164,6 +164,65 @@ def calImgDif(image1, image2):
   plt.show()
 
 
+def itensidade(img, value, option = True):
+    
+    '''
+        Inputs:
+                - img = Imagem BGR;
+                - value = valor de ajuste de intensidade;
+                - option = True: aumentar 
+                           False: diminuir
+        Output: Salva imagem no diretório
+    '''
+    
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+
+    if(option == True):
+        lim = 255 - value
+        s[s > lim] = 255
+        s[s <= lim] += value
+    elif(option == False):
+        lim = 0 + value
+        s[s<lim] = 0
+        s[s>=lim] -= value
+
+    final_hsv = cv2.merge((h, s, v))
+    img = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
+    viewImage(img)
+    return img
+    
+
+def brightness(img, value, option = True):
+    
+    '''
+        Inputs:
+                - img = Imagem BGR;
+                - value = valor de ajuste de brilho;
+                - option = True: aumentar de brilho
+                           False: diminuir brilho.
+        Output: Salva imagem no diretório
+    '''
+    
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+
+    if(option == True):
+        lim = 255 - value
+        v[v > lim] = 255
+        v[v <= lim] += value
+    elif(option == False):
+        lim = 0 + value
+        v[v<lim] = 0
+        v[v>=lim] -= value
+
+    final_hsv = cv2.merge((h, s, v))
+    img = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
+    #cv2.imwrite("image_processed.jpg", img)
+    viewImage(img)
+    return img
+
+
 def menu():
   choice = ''
   image1 = None
@@ -239,8 +298,36 @@ def menu():
       if (option == 'A' or option == 'a') and image1 is not None and image2 is not None:
         calImgDif(image1, image2)
 
+    elif choice=="F" or choice=="f":
+      img = ''
+      if image1 is not None and image2 is not None:
+        img = input('Qual das imagens deseja alterar a intensidade? A:'+name1+' B:'+name2+' :')
+      
+      print('(Utilize valor negativo para diminuir e positivo para aumentar)')
+      value = input('A intensidade será alterada em quanto?  [-255,255] :')
+      
+      if type(value) is int and value >= -255 and value <= 255:
+        if image2 is None or img == 'A' or img == 'a':
+          image1 = itensidade(image1, value, (value>0))
+        elif image1 is None or img == 'B' or img == 'b':
+          image2 = itensidade(image2, value, (value>0))
+
+    elif choice=="G" or choice=="g":
+      img = ''
+      if image1 is not None and image2 is not None:
+        img = input('Qual das imagens deseja alterar a intensidade? A:'+name1+' B:'+name2+' :')
+      
+      print('(Utilize valor negativo para diminuir e positivo para aumentar)')
+      value = input('O grilho será alterado em quanto?  [-255,255] :')
+      
+      if type(value) is int and value >= -255 and value <= 255:
+        if image2 is None or img == 'A' or img == 'a':
+          image1 = brightness(image1, value, (value>0))
+        elif image1 is None or img == 'B' or img == 'b':
+          image2 = brightness(image2, value, (value>0))
+
     else:
-      print("You must only select either A,B,C,D,E or Q.")
+      print("You must only select either A,B,C,D,E,F,G or Q.")
       print("Please try again")
 
 
