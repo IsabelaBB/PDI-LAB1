@@ -48,7 +48,7 @@ def loadImage():
 
 
 # - Visualizar arquivos de imagem acromáticas e de imagens coloridas 
-def viewImage(image):
+def viewImage(image, title='image'):
   #h, w, c = image.shape
   if len(image.shape) > 2:
     # imagem é colorida
@@ -56,6 +56,8 @@ def viewImage(image):
   else:
     # imagem está em escala de cinza
     plt.imshow(image, cmap='gray')
+
+  plt.title(title)
   plt.show()
   
 
@@ -69,82 +71,43 @@ def saveImage(image):
 # - Calcular e visualizar o(s) histograma(s) de imagem acromáticas e de imagens coloridas 
 # (opção de visualizar a imagem à esquerda, o histograma à direita) 
 # - A partir de arquivos de imagens coloridas, separar as componentes R, G e B, para posterior processamento 
-def viewHistograms(image1, image2):
+def viewHistograms(image):
   # se as imagens já forem cinza, a conversão gera um erro
-  if image1 is not None:
+  if image is not None:
     # imagem cinza
-    if len(image1.shape) == 2:
-      GR = cv2.calcHist([image1],[0],None,[256],[0,255])
+    if len(image.shape) == 2:
+      GR = cv2.calcHist([image],[0],None,[256],[0,255])
 
-      plt.subplot(121), plt.imshow(image1, cmap='gray', vmin=0, vmax=255)
-      plt.subplot(122), plt.plot(GR, color='gray')
+      plt.subplot(121), plt.imshow(image, cmap='gray', vmin=0, vmax=255), plt.title('Imagem cinza')
+      plt.subplot(122), plt.plot(GR, color='gray'), plt.title('Histograma da imagem cinza')
 
       plt.xlim([0,255])
       plt.show()
 
     # imagem colorida
     else:
-      image1 = cv2.cvtColor(image1,cv2.COLOR_BGR2RGB)
-      gray = cv2.cvtColor(image1,cv2.COLOR_RGB2GRAY)
+      image1 = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+      gray = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
 
-      R = cv2.calcHist([image1],[0],None,[256],[0,255])
-      G = cv2.calcHist([image1],[1],None,[256],[0,255])
-      B = cv2.calcHist([image1],[2],None,[256],[0,255])
+      R = cv2.calcHist([image],[0],None,[256],[0,255])
+      G = cv2.calcHist([image],[1],None,[256],[0,255])
+      B = cv2.calcHist([image],[2],None,[256],[0,255])
       GR = cv2.calcHist([gray],[0],None,[256],[0,255])
 
-      plt.subplot(421), plt.imshow(image1[:,:,0], cmap='gray', vmin=0, vmax=255)
-      plt.subplot(422), plt.plot(R,color='red')
-      plt.subplot(423), plt.imshow(image1[:,:,1], cmap='gray', vmin=0, vmax=255)
-      plt.subplot(424), plt.plot(G,color='green')
-      plt.subplot(425), plt.imshow(image1[:,:,2], cmap='gray', vmin=0, vmax=255)
-      plt.subplot(426), plt.plot(B,color='blue')
-      plt.subplot(427), plt.imshow(gray, cmap='gray', vmin=0, vmax=255)
-      plt.subplot(428), plt.plot(GR, color='gray')
+      #plt.subplot(212), plt.plot(R,color='red'), plt.plot(G,color='green'), plt.plot(B,color='blue'), plt.plot(gray,color='gray'), plt.title('Histogramas')
+      plt.subplot(241), plt.imshow(image[:,:,0], cmap='gray', vmin=0, vmax=255), plt.title('Componente RED')
+      plt.subplot(242), plt.imshow(image[:,:,1], cmap='gray', vmin=0, vmax=255), plt.title('Componente GREEN')
+      plt.subplot(243), plt.imshow(image[:,:,2], cmap='gray', vmin=0, vmax=255), plt.title('Componente BLUE')
+      plt.subplot(244), plt.imshow(gray, cmap='gray', vmin=0, vmax=255), plt.title('Imagem cinza')
+      
+      plt.subplot(245), plt.plot(R,color='red'), plt.title('Histograma RED')
+      plt.subplot(246), plt.plot(G,color='green'), plt.title('Histograma GREEN')
+      plt.subplot(247), plt.plot(B,color='blue'), plt.title('Hisograma BLUE')
+      plt.subplot(248), plt.plot(GR, color='gray'), plt.title('Histograma da imagem cinza')
 
       plt.xlim([0,255])
       plt.show()
 
-  if image2 is not None:
-    # imagem cinza
-    if len(image2.shape) == 2:
-      GR = cv2.calcHist([image2],[0],None,[256],[0,255])
-
-      plt.subplot(121), plt.imshow(image2, cmap='gray', vmin=0, vmax=255)
-      plt.subplot(122), plt.plot(GR, color='gray')
-
-      plt.xlim([0,255])
-      plt.show()
-
-    # imagem colorida
-    else:
-      image2 = cv2.cvtColor(image2,cv2.COLOR_BGR2RGB)
-      gray = cv2.cvtColor(image2,cv2.COLOR_RGB2GRAY)
-
-      R = cv2.calcHist([image2],[0],None,[256],[0,255])
-      G = cv2.calcHist([image2],[1],None,[256],[0,255])
-      B = cv2.calcHist([image2],[2],None,[256],[0,255])
-      GR = cv2.calcHist([gray],[0],None,[256],[0,255])
-
-      plt.subplot(421), plt.imshow(image2[:,:,0], cmap='gray', vmin=0, vmax=255)
-      plt.subplot(422), plt.plot(R,color='red')
-      plt.subplot(423), plt.imshow(image2[:,:,1], cmap='gray', vmin=0, vmax=255)
-      plt.subplot(424), plt.plot(G,color='green')
-      plt.subplot(425), plt.imshow(image2[:,:,2], cmap='gray', vmin=0, vmax=255)
-      plt.subplot(426), plt.plot(B,color='blue')
-      plt.subplot(427), plt.imshow(gray, cmap='gray', vmin=0, vmax=255)
-      plt.subplot(428), plt.plot(GR, color='gray')
-
-      plt.xlim([0,255])
-      plt.show()
-
-    '''
-    plt.subplot(411), plt.hist(image[:,:,0].ravel(),range=[0,255])
-    plt.subplot(412), plt.hist(image[:,:,1].ravel(),range=[0,255])
-    plt.subplot(413), plt.hist(image[:,:,2].ravel(),range=[0,255])
-    plt.subplot(414), plt.plot(R,color='red'), plt.plot(G,color='green'), plt.plot(B,color='blue'), plt.plot(gray,color='gray')
-    plt.xlim([0,256])
-    plt.show()
-    '''
 
 
 # - Calcular a imagem-diferença entre duas imagens acromáticas 
@@ -157,17 +120,30 @@ def calImgDif(image1, image2):
   if len(image2.shape) > 2:
     image2 = cv2.cvtColor(image2,cv2.COLOR_BGR2GRAY)
 
+  
+  print('image1 = '+str(image1.shape))
+  print('image2 = '+str(image2.shape))
+  print('..')
+
   # imagens com tamanhos diferentes precisam ser redimensionadas para o mesmo tamanho, ou também irá gerar erro
   if image1.size > image2.size:
-    image1 = cv2.resize(image1,image2.shape[:2])
+    image1 = cv2.resize(image1,(image2.shape[1], image2.shape[0]))
+    print('image1 = '+str(image1.shape))
   elif image1.size < image2.size:
-    image2 = cv2.resize(image2,image1.shape[:2])
+    image2 = cv2.resize(image2,(image1.shape[1], image1.shape[0]))
+    print('image2 = '+str(image2.shape))
 
   (score, diff) = compare_ssim(image1, image2, full=True)
   diff = (diff * 255).astype("uint8")
-  plt.imshow(diff, cmap='gray')
-  plt.title('Erro médio quadrático: '+str(np.square(diff).mean())+', PSNR: '+str(cv2.PSNR(image1, image2)))
-  plt.show()
+  
+  print('Erro médio quadrático: '+str(np.square(diff).mean())+', PSNR: '+str(cv2.PSNR(image1, image2)))
+  print('<Pressione ENTER para continuar>')
+  viewImage(diff, 'Imagem diferença')
+  input()
+  
+  #plt.imshow(diff, cmap='gray')
+  #plt.title('Erro médio quadrático: '+str(np.square(diff).mean())+', PSNR: '+str(cv2.PSNR(image1, image2)))
+  #plt.show()
 
 
 def itensidade(img, value, option = True):
@@ -181,22 +157,28 @@ def itensidade(img, value, option = True):
     Output: Salva imagem no diretório
   '''
   
-  print('entrou na funcao')
-  hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+  if len(img.shape) > 2:
+      hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+  else:
+    img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
   h, s, v = cv2.split(hsv)
 
   if(option == True):
     lim = 255 - value
     s[s > lim] = 255
     s[s <= lim] += value
+    i = 'aumentou'
   elif(option == False):
     lim = 0 + value
     s[s<lim] = 0
     s[s>=lim] -= value
+    i = 'diminuiu'
 
   final_hsv = cv2.merge((h, s, v))
   img = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
-  viewImage(img)
+  viewImage(img, 'Intensidade %s em %d' % (i,value))
 
   return img
     
@@ -211,23 +193,28 @@ def brightness(img, value, option = True):
                            False: diminuir brilho.
         Output: Salva imagem no diretório
     '''
-    
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    if len(img.shape) > 2:
+      hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    else:
+      img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+      hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     h, s, v = cv2.split(hsv)
 
     if(option == True):
         lim = 255 - value
         v[v > lim] = 255
         v[v <= lim] += value
+        b = 'aumentou'
     elif(option == False):
         lim = 0 + value
         v[v<lim] = 0
         v[v>=lim] -= value
+        b = 'diminuiu'
 
     final_hsv = cv2.merge((h, s, v))
     img = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
     #cv2.imwrite("image_processed.jpg", img)
-    viewImage(img)
+    viewImage(img, 'Brilho %s em %d'%(b,value))
     return img
 
 
@@ -240,18 +227,18 @@ def subamostragem(image,amostra=2):
       for y in range(new_shape[1]):
         for z in range(new_shape[2]):
           img_sub[x][y][z] = image[(x*amostra)][(y*amostra)][z]
+    img_sub=cv2.cvtColor(img_sub,cv2.COLOR_RGB2BGR)
 
   else:
-    new_shape = (int((img_gray.shape[0] + 0.5)/amostra), int((img_gray.shape[1] + 0.5)/amostra)) #divide a imagem em 1/4
+    new_shape = (int((image.shape[0] + 0.5)/amostra), int((image.shape[1] + 0.5)/amostra)) #divide a imagem em 1/4
     #print("new shape: ", new_shape)
     img_sub = np.zeros((new_shape[0],new_shape[1]), np.uint8)
     #print(img_bin.shape)
     for x in range(new_shape[0]):
       for y in range(new_shape[1]):
-        img_sub[x][y] =  int(img_gray[(x*amostra)][(y*amostra)])
+        img_sub[x][y] =  int(image[(x*amostra)][(y*amostra)])
   
-  plt.imshow(img_sub)
-  plt.show()
+  viewImage(img_sub,'Subamostragem em %d, dimensões: %dx%d'%(amostra, new_shape[0], new_shape[1]))
   return img_sub
 
 
@@ -271,8 +258,7 @@ def binarizar(image, limiar=128):
       else:
         img_bin[x][y] = 255 #muita cor, branco
 
-  plt.imshow(img_bin, cmap='gray')
-  plt.show()
+  viewImage(img_bin, 'Imagem binarizada em %d'%limiar)
   return img_bin
 
 
@@ -339,7 +325,8 @@ def menu():
         
 
     elif choice=="D" or choice=="d":
-      viewHistograms(image1, image2)
+      viewHistograms(image1)
+      viewHistograms(image2)
       
 
     elif choice=="E" or choice=="e":
@@ -364,11 +351,12 @@ def menu():
       print('(Utilize valor negativo para diminuir e positivo para aumentar)')
       value = input('A intensidade será alterada em quanto?  [-255,255] :')
       value = int(value)
+      
       if value >= -255 and value <= 255:
         if image2 is None or img == 'A' or img == 'a':
-          image1 = itensidade(image1, value, (value>0))
+          image1 = itensidade(image1, abs(value), (value>0))
         elif image1 is None or img == 'B' or img == 'b':
-          image2 = itensidade(image2, value, (value>0))
+          image2 = itensidade(image2, abs(value), (value>0))
 
     elif choice=="G" or choice=="g":
       img = ''
@@ -378,12 +366,12 @@ def menu():
       print('(Utilize valor negativo para diminuir e positivo para aumentar)')
       value = input('O brilho será alterado em quanto?  [-255,255] :')
       value = int(value)
-
+      
       if value >= -255 and value <= 255:
         if image2 is None or img == 'A' or img == 'a':
-          image1 = brightness(image1, value, (value>0))
+          image1 = brightness(image1, abs(value), (value>0))
         elif image1 is None or img == 'B' or img == 'b':
-          image2 = brightness(image2, value, (value>0))
+          image2 = brightness(image2, abs(value), (value>0))
 
     elif choice=="H" or choice=="h":
       img = ''
