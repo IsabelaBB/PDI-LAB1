@@ -5,7 +5,6 @@ import numpy as np
 import sys
 import os
 import matplotlib
-#import tkinter
 from matplotlib import pyplot as plt
 # Agg backend runs without a display
 matplotlib.use( 'tkagg' )
@@ -120,7 +119,6 @@ def calImgDif(image1, image2):
   if len(image2.shape) > 2:
     image2 = cv2.cvtColor(image2,cv2.COLOR_BGR2GRAY)
 
-  
   print('image1 = '+str(image1.shape))
   print('image2 = '+str(image2.shape))
   print('..')
@@ -160,8 +158,8 @@ def itensidade(img, value, option = True):
   if len(img.shape) > 2:
       hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
   else:
-    img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    img2 = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    hsv = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
 
   h, s, v = cv2.split(hsv)
 
@@ -177,10 +175,10 @@ def itensidade(img, value, option = True):
     i = 'diminuiu'
 
   final_hsv = cv2.merge((h, s, v))
-  img = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
-  viewImage(img, 'Intensidade %s em %d' % (i,value))
+  img2 = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
+  viewImage(img2, 'Intensidade %s em %d' % (i,value))
 
-  return img
+  return saveChanges(img, img2)
     
 
 def brightness(img, value, option = True):
@@ -196,8 +194,8 @@ def brightness(img, value, option = True):
     if len(img.shape) > 2:
       hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     else:
-      img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-      hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+      img2 = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+      hsv = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
     h, s, v = cv2.split(hsv)
 
     if(option == True):
@@ -212,21 +210,21 @@ def brightness(img, value, option = True):
         b = 'diminuiu'
 
     final_hsv = cv2.merge((h, s, v))
-    img = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
+    img2 = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
     #cv2.imwrite("image_processed.jpg", img)
-    viewImage(img, 'Brilho %s em %d'%(b,value))
-    return img
+    viewImage(img2, 'Brilho %s em %d'%(b,value))
+    return saveChanges(img, img2)
 
 
 def subamostragem(image,amostra=2):
   if len(image.shape) > 2:
-    image=cv2.cvtColor(image,cv2.COLOR_BGR2RGB) #a imagem vem em formato BGR
-    new_shape = (int((image.shape[0] + 0.5)/amostra), int((image.shape[1] + 0.5)/amostra), image.shape[2]) #divide a imagem em 1/4
+    image2=cv2.cvtColor(image,cv2.COLOR_BGR2RGB) #a imagem vem em formato BGR
+    new_shape = (int((image2.shape[0] + 0.5)/amostra), int((image2.shape[1] + 0.5)/amostra), image2.shape[2]) #divide a imagem em 1/4
     img_sub = np.zeros((new_shape[0],new_shape[1],new_shape[2]), np.uint8)
     for x in range(new_shape[0]):
       for y in range(new_shape[1]):
         for z in range(new_shape[2]):
-          img_sub[x][y][z] = image[(x*amostra)][(y*amostra)][z]
+          img_sub[x][y][z] = image2[(x*amostra)][(y*amostra)][z]
     img_sub=cv2.cvtColor(img_sub,cv2.COLOR_RGB2BGR)
 
   else:
@@ -239,35 +237,36 @@ def subamostragem(image,amostra=2):
         img_sub[x][y] =  int(image[(x*amostra)][(y*amostra)])
   
   viewImage(img_sub,'Subamostragem em %d, dimensões: %dx%d'%(amostra, new_shape[0], new_shape[1]))
-  return img_sub
+  return saveChanges(image, img_sub)
 
 
 def binarizar(image, limiar=128):
   #Binarização da imagem
   if len(image.shape) > 2:
-    image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-  
-  img_bin = np.zeros(image.shape, np.uint8)
+    image2 = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+  else:
+    image2 = image
+
+  img_bin = np.zeros(image2.shape, np.uint8)
   
   #passa a dimensão y (sao invertidos), mas aqui usa-se o x por convencao
   for x in range(img_bin.shape[0]): 
     for y in range(img_bin.shape[1]):
       #print(img_gray[x][y])
-      if image[x][y] <= limiar:
+      if image2[x][y] <= limiar:
         img_bin[x][y] = 0 #ausência de cor é preto (baixa cor)
       else:
         img_bin[x][y] = 255 #muita cor, branco
 
   viewImage(img_bin, 'Imagem binarizada em %d'%limiar)
-  return img_bin
+  return saveChanges(image, img_bin)
+
 
 
 def menu():
   choice = ''
-  image1 = None
-  image2 = None
-  name1 = ''
-  name2 = ''
+  images = [None , None]
+  names = ['', '']
 
   while(choice is not 'Q' and choice is not 'q'):
     print("************MENU**************")
@@ -279,10 +278,10 @@ def menu():
                       C: Salvar imagem
                       D: Exibir Histograms
                       E: Calcular imagem-diferença, erro médio quadrático e PSNR
-                      F: Alterar a intensidade da imagem
-                      G: Alterar o brilho da imagem
-                      H: Fazer sub-amostragem de uma imagem
-                      I: Binarizar a imagem
+                      F: Alterar a intensidade
+                      G: Alterar o brilho
+                      H: Fazer sub-amostragem
+                      I: Binarizar
                       Q: Sair
 
                       Opção: """)
@@ -291,120 +290,87 @@ def menu():
         sys.exit
 
     elif choice == "A" or choice =="a":
-      option = ''
-      if image1 is not None and image2 is not None:
-        option = input('Qual das imagens deseja sobrescrever? A:'+name1+' B:'+name2+' :')
-      if image1 is None or option == 'A' or option == 'a':
-        image1, name1 = loadImage()
-      elif image2 is None or option == 'B' or option == 'b':
-        image2, name2 = loadImage()
+      n = options(images, names, 'Qual das imagens deseja sobrescrever?')
+      images[n], names[n] = loadImage()
 
-    elif image1 is None and image2 is None:
+    elif images[0] is None and images[1] is None:
       print('Nenhuma imagem no sistema')
       print('<Pressione ENTER para continuar>')
       input()
       
     elif choice == "B" or choice =="b":
-      option = ''
-      if image1 is not None and image2 is not None:
-        option = input('Qual das imagens deseja visualizar? A:'+name1+' B:'+name2+' :')
-      if image2 is None or option == 'A' or option == 'a':
-        viewImage(image1)
-      elif image1 is None or option == 'B' or option == 'b':
-        viewImage(image2)
+      n = options(images, names, 'Qual das imagens deseja visualizar?')
+      viewImage(images[n])
       
 
     elif choice == "C" or choice =="c":
-      option = ''
-      if image1 is not None and image2 is not None:
-        option = input('Qual das imagens deseja salvar? A:'+name1+' B:'+name2+' :')
-      if image2 is None or option == 'A' or option == 'a':
-        saveImage(image1)
-      elif image1 is None or option == 'B' or option == 'b':
-        saveImage(image2)
-        
+      n = options(images, names, 'Qual das imagens deseja salvar?')
+      saveImage(images[n])
 
     elif choice=="D" or choice=="d":
-      viewHistograms(image1)
-      viewHistograms(image2)
+      viewHistograms(images[0])
+      viewHistograms(images[1])
       
 
     elif choice=="E" or choice=="e":
       option = 'A'
-      if image1 is None or image2 is None:
+      if images[0] is None or images[1] is None:
         print('Sao necessarias duas imagens no sistema para calcular a diferenca')
         option = input('Deseja carregar outra imagem ? A:sim B:nao  :')
 
-        if (option == 'A' or option == 'a') and image1 is None:
-          image1, name1 = loadImage()
-        elif (option == 'A' or option == 'a') and image2 is None:
-          image2, name2 = loadImage()
+        if (option == 'A' or option == 'a') and images[0] is None:
+          images[0], names[0] = loadImage()
+        elif (option == 'A' or option == 'a') and images[1] is None:
+          images[1], names[1] = loadImage()
 
-      if (option == 'A' or option == 'a') and image1 is not None and image2 is not None:
-        calImgDif(image1, image2)
+      if (option == 'A' or option == 'a') and images[0] is not None and images[1] is not None:
+        calImgDif(images[0], images[1])
 
     elif choice=="F" or choice=="f":
-      img = ''
-      if image1 is not None and image2 is not None:
-        img = input('Qual das imagens deseja alterar a intensidade? A:'+name1+' B:'+name2+' :')
+      n = options(images, names, 'Qual das imagens deseja alterar a intensidade?')
       
+      value = 0
       print('(Utilize valor negativo para diminuir e positivo para aumentar)')
       value = input('A intensidade será alterada em quanto?  [-255,255] :')
       value = int(value)
       
       if value >= -255 and value <= 255:
-        if image2 is None or img == 'A' or img == 'a':
-          image1 = itensidade(image1, abs(value), (value>0))
-        elif image1 is None or img == 'B' or img == 'b':
-          image2 = itensidade(image2, abs(value), (value>0))
+        images[n] = itensidade(images[n], abs(value), (value>0))
 
     elif choice=="G" or choice=="g":
-      img = ''
-      if image1 is not None and image2 is not None:
-        img = input('Qual das imagens deseja alterar a intensidade? A:'+name1+' B:'+name2+' :')
+      n = options(images, names, 'Qual das imagens deseja alterar o brilho?')
       
       print('(Utilize valor negativo para diminuir e positivo para aumentar)')
       value = input('O brilho será alterado em quanto?  [-255,255] :')
       value = int(value)
       
       if value >= -255 and value <= 255:
-        if image2 is None or img == 'A' or img == 'a':
-          image1 = brightness(image1, abs(value), (value>0))
-        elif image1 is None or img == 'B' or img == 'b':
-          image2 = brightness(image2, abs(value), (value>0))
+        images[n] = brightness(images[n], abs(value), (value>0))
 
     elif choice=="H" or choice=="h":
-      img = ''
-      if image1 is not None and image2 is not None:
-        img = input('Qual das imagens deseja alterar a intensidade? A:'+name1+' B:'+name2+' :')
+      n = options(images, names, 'Qual das imagens deseja alterar a amostragem?')
       
-      print('(O valor de amostragem, aqui, representa, aproximadamente, quantos pixels serão unidos em x e y. Este valor é aproximado porque as dimensoes da imagem podem não ser multiplas do valor da amostragem)')
+      print(' O valor de amostragem, aqui, representa, aproximadamente, quantos pixels serão unidos em x e y.')
+      print(' Este valor é aproximado porque as dimensoes da imagem podem não ser multiplas do valor da amostragem')
       value = input('A amostragem será alterado em quanto?  (0 < amostragem) :')
       value = int(value)
 
       if value > 0:
-        if image2 is None or img == 'A' or img == 'a':
-          image1 = subamostragem(image1, value)
-        elif image1 is None or img == 'B' or img == 'b':
-          image2 = subamostragem(image2, value)
+        images[n] = subamostragem(images[n], value)
     
     elif choice=='I' or choice=='i':
-      img = ''
-      if image1 is not None and image2 is not None:
-        img = input('Qual das imagens deseja alterar a intensidade? A:'+name1+' B:'+name2+' :')
+      n = options(images, names, 'Qual das imagens deseja binarizar?')
 
       value = input('Limiar?  (0 < limiar < 255) :')
       value = int(value)
 
       if value > 0 and value < 255:
-        if image2 is None or img == 'A' or img == 'a':
-          image1 = binarizar(image1, value)
-        elif image1 is None or img == 'B' or img == 'b':
-          image2 = binarizar(image2, value)
+        images[n] = binarizar(images[n], value)
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
       print("Please try again")
 
 
 if __name__=="__main__":
+  from utils import options, saveChanges
   menu()
