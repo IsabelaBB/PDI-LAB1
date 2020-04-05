@@ -198,6 +198,20 @@ def equalizeHist_gray(image):
   lab1.viewHistograms(image)
   return saveChanges(original, image)
 
+def trans_intensidade_gray(image,a=80,b=160,alfa=40,beta=10, charlie=-30):
+  original = image
+  if len(image.shape) > 2:
+    image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+  for i in range(image.shape[0]):
+    for j in range(image.shape[1]):
+      if image[i][j] < a:
+        image[i][j]  = image[i][j]  + alfa
+      elif image[i][j] > a and image[i][j] < b:
+        image[i][j]  = image[i][j]  + beta
+      else:
+        image[i][j]  = image[i][j]  + charlie
+  #plt.imshow(image, cmap='gray')
+  return saveChanges(original, image)
 
 
 def menu():
@@ -215,7 +229,7 @@ def menu():
                       C: Salvar imagem
                       D: Exibir negativo
                       E: Equalizar histograma
-                      F: 
+                      F: Transformação de Intensidade Gray
                       G: 
                       H: 
                       I: 
@@ -254,6 +268,14 @@ def menu():
       n = options(images, names, 'Qual das imagens será equalizada?')
       images[n] = equalizeHist_gray(images[n])
 
+    elif choice=="F" or choice=="f":
+      n = options(images, names, 'Qual das imagens será transformada (gray)?')
+      mudar = input("Deseja mudar os intervalos e valores da transformada (s/n)? ")
+      if mudar == 's' or mudar == 'S':
+        a,b,alfa,beta,charlie = input("Qual é o valor do limiar (faixa de valores) 'a' e 'b', e quais os novos valores serão atribuídos aos intervalos 1, 2 e 3? [escrever em uma linha, separado por vírgula] ")
+      images[n] = trans_intensidade_gray(images[n])
+      
+
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
       print("Please try again")
@@ -262,3 +284,4 @@ def menu():
 if __name__=="__main__":
   import lab1
   menu()
+
