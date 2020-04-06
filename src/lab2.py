@@ -213,6 +213,34 @@ def trans_intensidade_gray(image,a=80,b=160,alfa=40,beta=10, charlie=-30):
   #plt.imshow(image, cmap='gray')
   return saveChanges(original, image)
 
+def trans_potencia(image):
+  original = image
+  c = 1
+  gamma = 2.5
+  
+  altura = original.shape[0]
+  largura = original.shape[1]
+  
+  if len(original.shape) > 2 :
+    dimensoes = original.shape[2]    
+    image = np.zeros((altura,largura,dimensoes),dtype=np.float32)
+    
+    for i in range(altura):
+        for j in range(largura):
+            for k in range(dimensoes):
+              image[i,j,k] = c*math.pow(original[i, j, k], gamma)
+            
+    
+  else:
+    image = np.zeros((altura,largura,1),dtype=np.float32)
+    
+    for i in range(altura):
+        for j in range(largura):
+              image[i,j] = c*math.pow(original[i, j], gamma)
+              
+  cv2.normalize(image,image,0,255,cv2.NORM_MINMAX)
+  image = cv2.convertScaleAbs(image)
+  lab1.viewImage(image);
 
 def menu():
   choice = ''
@@ -230,7 +258,7 @@ def menu():
                       D: Exibir negativo
                       E: Equalizar histograma
                       F: Transformação de Intensidade Gray
-                      G: 
+                      G: Transformação de Potencia
                       H: 
                       I: 
                       Q: Sair
@@ -275,7 +303,10 @@ def menu():
         a,b,alfa,beta,charlie = input("Qual é o valor do limiar (faixa de valores) 'a' e 'b', e quais os novos valores serão atribuídos aos intervalos 1, 2 e 3? [escrever em uma linha, separado por vírgula] ")
       images[n] = trans_intensidade_gray(images[n])
       
-
+    elif choice=="G" or choice=="g":
+      n = options(images, names, 'Qual das imagens será transformada?')
+      images[n] = trans_potencia(images[n])
+      
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
       print("Please try again")
