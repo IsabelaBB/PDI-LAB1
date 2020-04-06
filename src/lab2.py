@@ -30,6 +30,27 @@ def negative(image):
   lab1.viewImage(im_neg, 'imagem negativa')
   return saveChanges(image, im_neg)
 
+#negativo de imagem colorida
+def negative_rgb(image):
+
+  '''
+    Input: imagem BGR
+    Output: None
+  '''
+
+  #separa as componentes RGB  
+  B, G, R = cv2.split(image)
+  
+  #inverte cada componente
+  B_neg = 255-B
+  G_neg = 255-G
+  R_neg = 255-R
+
+  #merge das componentes
+  im_neg = cv2.merge([B_neg, G_neg, R_neg])
+  
+  lab1.viewImage(im_neg, 'Imagem Negativa')
+
 
 
 # Equalização de histograma
@@ -243,6 +264,18 @@ def trans_potencia(image):
   image = cv2.convertScaleAbs(image)
   lab1.viewImage(image);
 
+def binarizar_gray(image, limiar = 100):
+
+  '''
+      Input: imagem - imagem em tons de cinza
+             limiar - limiar da binarização, default = 100
+      Output: None
+  '''
+  image[image<limiar] = 1
+  image[image>=limiar] = 0
+  
+  lab1.viewImage(image);
+  
 def menu():
   choice = ''
   images = [None , None]
@@ -260,8 +293,8 @@ def menu():
                       E: Equalizar histograma
                       F: Transformação de Intensidade Gray
                       G: Transformação de Potencia
-                      H: 
-                      I: 
+                      H: Binarização de Imagem Gray
+                      I: Exibir Negativo Imagem Colorida
                       Q: Sair
 
                       Opção: """)
@@ -307,7 +340,16 @@ def menu():
     elif choice=="G" or choice=="g":
       n = options(images, names, 'Qual das imagens será transformada?')
       images[n] = trans_potencia(images[n])
-      
+    
+    elif choice=="H" or choice=="h":
+      n = options(images, names, 'Qual das imagens será binarizada?')
+      limiar = input('Qual o valor de limiar?')
+      images[n] = binarizar_gray(images[n],float(limiar))
+    
+    elif choice=="I" or choice=="i":
+      n = options(images, names, 'Qual das imagens será negativa?')
+      images[n] = negative_rgb(images[n])
+    
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
       print("Please try again")
