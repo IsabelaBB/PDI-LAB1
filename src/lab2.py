@@ -5,6 +5,7 @@ import numpy as np
 import sys
 import os
 import matplotlib
+import math
 from matplotlib import pyplot as plt
 # Agg backend runs without a display
 matplotlib.use( 'tkagg' )
