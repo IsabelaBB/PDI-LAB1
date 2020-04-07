@@ -235,6 +235,15 @@ def trans_intensidade_gray(image,a=80,b=160,alfa=40,beta=10, charlie=-30):
   #plt.imshow(image, cmap='gray')
   return saveChanges(original, image)
 
+
+'''
+Essa funcao aplica a formula abaixo à imagem
+s = c*e^gamma
+s - saída
+e - entrada
+
+c e gamma são constantes
+'''
 def trans_potencia(image):
   original = image
   c = 1
@@ -243,23 +252,27 @@ def trans_potencia(image):
   altura = original.shape[0]
   largura = original.shape[1]
   
+  #se a imagem for RGB
   if len(original.shape) > 2 :
-    dimensoes = original.shape[2]    
+    dimensoes = original.shape[2]
+    #matriz de saída
     image = np.zeros((altura,largura,dimensoes),dtype=np.float32)
     
+    #percorrendo a imagem para aplicacao da formula
     for i in range(altura):
         for j in range(largura):
             for k in range(dimensoes):
               image[i,j,k] = c*math.pow(original[i, j, k], gamma)
             
-    
+  #caso, contrário  
   else:
     image = np.zeros((altura,largura,1),dtype=np.float32)
     
     for i in range(altura):
         for j in range(largura):
               image[i,j] = c*math.pow(original[i, j], gamma)
-              
+            
+  #normalizacao da imagem [0,255]            
   cv2.normalize(image,image,0,255,cv2.NORM_MINMAX)
   image = cv2.convertScaleAbs(image)
   lab1.viewImage(image);
