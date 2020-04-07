@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt
 # Agg backend runs without a display
 matplotlib.use( 'tkagg' )
 from skimage.measure import compare_ssim
+from utils import options, saveChanges
 
 '''
 TRABALHO LAB1 PDI
@@ -44,6 +45,25 @@ def loadImage():
   print('<Pressione ENTER para continuar>')
   input()
   return None,''
+
+
+# - Visualizar arquivos de imagem acromáticas e de imagens coloridas 
+def viewImages(images, titles=['image']):
+  f = plt.figure()
+  i = 1
+
+  for image in images:
+    title = titles[i-1]
+    f.add_subplot(1,len(images),i)
+    plt.title(title)
+    if len(image.shape) > 2: # imagem é colorida
+      plt.imshow(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
+    else: # imagem está em escala de cinza
+      plt.imshow(image, cmap='gray')
+    i = i + 1
+  
+  plt.show()
+
 
 
 # - Visualizar arquivos de imagem acromáticas e de imagens coloridas 
@@ -300,7 +320,7 @@ def menu():
       
     elif choice == "B" or choice =="b":
       n = options(images, names, 'Qual das imagens deseja visualizar?')
-      viewImage(images[n])
+      viewImage(images[n], names[n])
       
 
     elif choice == "C" or choice =="c":

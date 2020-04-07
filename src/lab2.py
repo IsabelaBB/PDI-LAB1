@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 matplotlib.use( 'tkagg' )
 from skimage.measure import compare_ssim
 from utils import options, saveChanges
+import lab1
 
 '''
 TRABALHO EM GRUPO DE NO MÁXIMO 5 PESSOAS ENVIAR LINK PARA ACESSO A TODOS OS CÓDIGOS, 
@@ -22,130 +23,85 @@ sendo, no mínimo: negativo, binarização e equalização de histogramas.
 '''
 
 
-# recebe uma imagem BGR, imprime o negativo da imagem
+# negativo de imagem
+# recebe uma imagem (BGR ou gray), imprime o negativo da imagem
 # e retorna uma imagem (original ou negativa)
 def negative(image):
-  im_neg = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-  im_neg = 255 - im_neg
-  lab1.viewImage(im_neg, 'imagem negativa')
-  return saveChanges(image, im_neg)
-
-#negativo de imagem colorida
-def negative_rgb(image):
 
   '''
     Input: imagem BGR
     Output: None
   '''
 
-  #separa as componentes RGB  
-  B, G, R = cv2.split(image)
-  
-  #inverte cada componente
-  B_neg = 255-B
-  G_neg = 255-G
-  R_neg = 255-R
+  if len(image.shape) > 2:
 
-  #merge das componentes
-  im_neg = cv2.merge([B_neg, G_neg, R_neg])
+    #separa as componentes RGB  
+    B, G, R = cv2.split(image)
   
-  lab1.viewImage(im_neg, 'Imagem Negativa')
+    #inverte cada componente
+    B_neg = 255-B
+    G_neg = 255-G
+    R_neg = 255-R
 
+    #merge das componentes
+    im_neg = cv2.merge([B_neg, G_neg, R_neg])
+  
+    # converte para escala de cinza
+    im_neg_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # inverte 
+    im_neg_gray = 255 - im_neg_gray
+
+    # exibe as imagens
+    lab1.viewImages([im_neg, im_neg_gray], ['Imagem Negativa', 'Imagem negativa Escala de Cinza'])
+
+  else:
+    im_neg = 255 - image # inverte
+    lab1.viewImage(im_neg, 'imagem negativa') # exibe a imagem
+    
+  return saveChanges(image, im_neg)
+  
 
 
 # Equalização de histograma
 # com os tres canais de cores (resultado estranho)
 def equalizeHist(image):
+
   if len(image.shape) < 3:
     print('Essa opção só é válida para imagens coloridas')
     print('<Pressione ENTER para continuar>')
     input()
     return image
 
-  original = image
-  
-  # probabilidade
-  p = [np.zeros(256), np.zeros(256), np.zeros(256)]
+  #Separa as componentes da imagem colorida
+  B, G, R = cv2.split(image)
 
-  # esse v_min é a intensidade mínima em cada canal de cor
-  v_min = [256, 256, 256] # o valor real (da formula) de v_min é v[0][v_min[0]], por exemplo
-  
-  # probabilidade acumulada
-  v = [np.zeros(256), np.zeros(256), np.zeros(256)]
+  #Equalizando cada componente separadamente
+  B_eq = cv2.equalizeHist(B)
+  G_eq = cv2.equalizeHist(G)
+  R_eq = cv2.equalizeHist(R)
 
-  h, w, _ = image.shape
+  #uni as componentes
+  image_eq = cv2.merge([B_eq, G_eq,R_eq])
 
-  # calcula valores de p e v_min
-  for x in range(w):
-    for y in range(h):
-      if image[y,x,0] < v_min[0]:
-        v_min[0] = image[y,x,0]
+  # plota imagens e histogramas
+  f = plt.figure()
 
-      if image[y,x,1] < v_min[1]:
-        v_min[1] = image[y,x,1]
+  f.add_subplot(2,2,1)
+  plt.title('Imagem original')
+  plt.imshow(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
 
-      if image[y,x,2] < v_min[2]:
-        v_min[2] = image[y,x,2]
+  f.add_subplot(2,2,2)
+  plt.title('Imagem equalizada')
+  plt.imshow(cv2.cvtColor(image_eq,cv2.COLOR_BGR2RGB))
 
-      p[0][image[y,x,0]] += 1
-      p[1][image[y,x,1]] += 1
-      p[2][image[y,x,2]] += 1
-      
-  # calcula valores de v
-  v[0][0] = p[0][0]/(w*h)
-  v[1][0] = p[1][0]/(w*h)
-  v[2][0] = p[2][0]/(w*h)
-  for i in range(255):
-    i += 1
-    v[0][i] = v[0][i-1] + p[0][i]/(w*h)
-    v[1][i] = v[1][i-1] + p[1][i]/(w*h)
-    v[2][i] = v[2][i-1] + p[2][i]/(w*h)
+  f.add_subplot(2,1,2)
+  plt.title('Histograma')
+  plt.plot(cv2.calcHist([image_eq],[0],None,[256],[0,255]), color='gray')
 
-  '''
-  # visualizar valores em p
-  plt.plot(p[0],color='red'), plt.title('Histograma P')
-  plt.plot(p[1],color='green')
-  plt.plot(p[2],color='blue')
-  plt.xlim([0,255])
   plt.show()
 
-  # visualizar valores em v
-  plt.plot(v[0], color='red'), plt.title('Histograma V')
-  plt.plot(v[1], color='green')
-  plt.plot(v[2], color='blue')
-  plt.xlim([0,255])
-  plt.show()
-  '''
-
-  # atualiza os valores da imagem (valores v*)
-  for x in range(w):
-    for y in range(h):
-      image[y,x,0] = int((v[0][image[y,x,0]] - v[0][v_min[0]]) / (1 - v[0][v_min[0]])*255 +0.5)
-      image[y,x,1] = int((v[1][image[y,x,1]] - v[1][v_min[1]]) / (1 - v[1][v_min[1]])*255 +0.5)
-      image[y,x,2] = int((v[2][image[y,x,2]] - v[2][v_min[2]]) / (1 - v[2][v_min[2]])*255 +0.5)
-
-  '''
-  print('v=')
-  for i in range(256):
-    print(str(v[0][i]) + ' ' + str(v[1][i]) + ' ' + str(v[2][i]))
-
-  print('')
-  for i in range(256):
-    print(str(p[0][i]) + ' ' + str(p[1][i]) + ' ' + str(p[2][i]))
-  '''
-
-  '''
-  # equalizacao automatica do opencv (para comparacao)
-  equ = cv2.equalizeHist(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY))
-  lab1.viewImage(equ, 'resultado da equalização2')
-  lab1.viewHistograms(equ)
-  '''
-
-  # exibe
-  lab1.viewImage(image, 'resultado da equalização')
-  lab1.viewHistograms(image)
-
-  return saveChanges(original, image)
+  return saveChanges(image, image_eq)
 
 
 
@@ -155,7 +111,10 @@ def equalizeHist_gray(image):
   original = image
 
   if len(image.shape) > 2:
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    print('Essa opção só é válida para imagens em tons de cinza')
+    print('<Pressione ENTER para continuar>')
+    input()
+    return image
 
   # probabilidade
   p = np.zeros(256)
@@ -175,64 +134,79 @@ def equalizeHist_gray(image):
 
       p[image[y,x]] += 1
       
-
   # calcula valores de v
   v[0] = p[0]/(w*h)
   for i in range(255):
     i += 1
     v[i] = v[i-1] + p[i]/(w*h)
 
-  '''
-  # visualizar valores em p
-  plt.plot(p,color='black'), plt.title('Histograma P')
-  plt.xlim([0,255])
-  plt.show()
-
-  # visualizar valores em v
-  plt.plot(v,color='black'), plt.title('Histograma V')
-  plt.xlim([0,255])
-  plt.show()
-  '''
-
   # atualiza os valores da imagem (valores v*)
   for x in range(w):
     for y in range(h):
       image[y,x] = int((v[image[y,x]] - v[v_min]) / (1 - v[v_min])*255 +0.5)
 
-  '''
-  print('v=')
-  for i in range(256):
-    print(str(v[i]))
+  # plota imagens e histogramas
+  f = plt.figure()
 
-  print('')
-  for i in range(256):
-    print(str(p[i]))
-  '''
+  f.add_subplot(2,2,1)
+  plt.title('Imagem original')
+  plt.imshow(original, cmap='gray')
 
-  '''
-  # equalizacao automatica do opencv (para comparacao)
-  equ = cv2.equalizeHist(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY))
-  lab1.viewImage(equ, 'resultado da equalização2')
-  lab1.viewHistograms(equ)
-  '''
+  f.add_subplot(2,2,2)
+  plt.title('Imagem equalizada')
+  plt.imshow(image, cmap='gray')
+
+  f.add_subplot(2,1,2)
+  plt.title('Histograma')
+  plt.plot(cv2.calcHist([image],[0],None,[256],[0,255]), color='gray')
+
+  plt.show()
 
   # exibe
-  lab1.viewHistograms(image)
+  #lab1.viewImages([original, image], ['Imagem original', 'Imagem equalizada'])
+  #lab1.viewHistograms(image)
+  
   return saveChanges(original, image)
+
+
 
 def trans_intensidade_gray(image,a=80,b=160,alfa=40,beta=10, charlie=-30):
   original = image
   if len(image.shape) > 2:
     image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+
   for i in range(image.shape[0]):
     for j in range(image.shape[1]):
+
       if image[i][j] < a:
         image[i][j]  = image[i][j]  + alfa
       elif image[i][j] > a and image[i][j] < b:
         image[i][j]  = image[i][j]  + beta
       else:
         image[i][j]  = image[i][j]  + charlie
+
   #plt.imshow(image, cmap='gray')
+  # plota imagens e histogramas
+  f = plt.figure()
+
+  f.add_subplot(2,2,1)
+  plt.title('Imagem original')
+  plt.imshow(cv2.cvtColor(original,cv2.COLOR_BGR2RGB))
+
+  f.add_subplot(2,2,2)
+  plt.title('Imagem transformada')
+  plt.imshow(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
+
+  f.add_subplot(2,2,3)
+  plt.title('Histograma da imagem original')
+  plt.plot(cv2.calcHist([original],[0],None,[256],[0,255]))
+
+  f.add_subplot(2,2,4)
+  plt.title('Histograma da imagem transformada')
+  plt.plot(cv2.calcHist([image],[0],None,[256],[0,255]))
+
+  plt.show()
+
   return saveChanges(original, image)
 
 
@@ -275,7 +249,31 @@ def trans_potencia(image):
   #normalizacao da imagem [0,255]            
   cv2.normalize(image,image,0,255,cv2.NORM_MINMAX)
   image = cv2.convertScaleAbs(image)
-  lab1.viewImage(image);
+  
+  # plota imagens e histogramas
+  f = plt.figure()
+
+  f.add_subplot(2,2,1)
+  plt.title('Imagem original')
+  plt.imshow(cv2.cvtColor(original,cv2.COLOR_BGR2RGB))
+
+  f.add_subplot(2,2,2)
+  plt.title('Imagem transformada')
+  plt.imshow(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
+
+  f.add_subplot(2,2,3)
+  plt.title('Histograma da imagem original')
+  plt.plot(cv2.calcHist([original],[0],None,[256],[0,255]))
+
+  f.add_subplot(2,2,4)
+  plt.title('Histograma da imagem transformada')
+  plt.plot(cv2.calcHist([image],[0],None,[256],[0,255]))
+
+  plt.show()
+  
+  return saveChanges(original, image)
+
+
 
 def binarizar_gray(image, limiar = 100):
 
@@ -287,8 +285,10 @@ def binarizar_gray(image, limiar = 100):
   image[image<limiar] = 1
   image[image>=limiar] = 0
   
-  lab1.viewImage(image);
+  lab1.viewImage(image)
   
+
+
 def menu():
   choice = ''
   images = [None , None]
@@ -306,8 +306,7 @@ def menu():
                       E: Equalizar histograma
                       F: Transformação de Intensidade Gray
                       G: Transformação de Potencia
-                      H: Binarização de Imagem Gray
-                      I: Exibir Negativo Imagem Colorida
+                      H: Binarização de Imagem
                       Q: Sair
 
                       Opção: """)
@@ -326,7 +325,7 @@ def menu():
       
     elif choice == "B" or choice =="b":
       n = options(images, names, 'Qual das imagens deseja visualizar?')
-      lab1.viewImage(images[n])
+      lab1.viewImage(images[n], names[n])
       
 
     elif choice == "C" or choice =="c":
@@ -337,11 +336,15 @@ def menu():
     elif choice=="D" or choice=="d":
       n = options(images, names, 'Qual das imagens será negativa?')
       images[n] = negative(images[n])
-      
+
 
     elif choice=="E" or choice=="e":
       n = options(images, names, 'Qual das imagens será equalizada?')
-      images[n] = equalizeHist_gray(images[n])
+      if len(images[n].shape) < 3:
+        images[n] = equalizeHist_gray(images[n])
+      else:
+        images[n] = equalizeHist(images[n])
+
 
     elif choice=="F" or choice=="f":
       n = options(images, names, 'Qual das imagens será transformada (gray)?')
@@ -350,25 +353,30 @@ def menu():
         a,b,alfa,beta,charlie = input("Qual é o valor do limiar (faixa de valores) 'a' e 'b', e quais os novos valores serão atribuídos aos intervalos 1, 2 e 3? [escrever em uma linha, separado por vírgula] ")
       images[n] = trans_intensidade_gray(images[n])
       
+
     elif choice=="G" or choice=="g":
       n = options(images, names, 'Qual das imagens será transformada?')
       images[n] = trans_potencia(images[n])
     
+    
     elif choice=="H" or choice=="h":
       n = options(images, names, 'Qual das imagens será binarizada?')
-      limiar = input('Qual o valor de limiar?')
-      images[n] = binarizar_gray(images[n],float(limiar))
+
+      value = input('Limiar?  (0 < limiar < 255) :')
+      value = int(value)
+
+      if value > 0 and value < 255:
+        images[n] = lab1.binarizar(images[n], value)
+      
+      #images[n] = binarizar_gray(images[n],float(limiar))
     
-    elif choice=="I" or choice=="i":
-      n = options(images, names, 'Qual das imagens será negativa?')
-      images[n] = negative_rgb(images[n])
-    
+
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
       print("Please try again")
 
 
+
 if __name__=="__main__":
-  import lab1
   menu()
 
