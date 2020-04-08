@@ -37,7 +37,6 @@ def menu():
                       K: Equalizar histograma
                       L: Transformação de Intensidade Gray
                       M: Transformação de Potencia
-                      N: Binarização de Imagem Gray
                       Q: Sair
 
                       Opção: """)
