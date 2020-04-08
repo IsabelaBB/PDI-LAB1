@@ -2,8 +2,8 @@ PDI-LAB1
 
 - Para instalar as dependencias: $ sudo bash install.sh
 
-- Para executar o programa: $ bash run.py
-											ou: $ source venv; python3 main.py; deactivate;
+- Para executar o programa: $ bash run.sh
+ou: $ source venv; python3 src/main.py; deactivate;
 
 - Caso gere algum erro, execute: $ sudo bash install-optional.sh
 
