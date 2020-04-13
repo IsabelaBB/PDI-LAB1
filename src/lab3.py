@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 import cv2
 import numpy as np
@@ -70,6 +71,49 @@ def calcMaskMedia(img):
   cv2.waitKey(0)
   cv2.destroyAllWindows()
   return media
+  
+def filterGaussian(img):
+  
+  '''
+    Input: img - imagem; 
+           sigmaX - desvio padrão na direção x
+           sigmaY - desvio padrão na direção y
+           
+           Obs.: Se apenas o sigmaX for especificado, o sigmaY será considerado igual ao sigmaX.
+                 Pelo menos o sigmaX deve, obrigatoriamente, ser especificado.
+    Output: None
+  '''
+    
+  #recebe a dimensao da mascara
+  mascara = int(input("Qual a mascara? ex.: 3 ou 5 ou 7 - APENAS valor ímpar > 3. \n --> "))
+
+  #opções de desvio
+  option = int(input("""
+                      1: Entrar com desvio de X e Y
+                      2: Entrar apenas com desvio de X
+                      Opção: """))
+  if(option == 1):
+    stdX = int(input("Qualo valor do desvio padrão de X ?"))
+    stdY = int(input("Qualo valor do desvio padrão de Y ?"))
+    #aplica a filtragem gaussiana
+    gaussian = cv2.GaussianBlur(img,(mascara,mascara),stdX, stdY)
+    
+  elif(option == 2):
+    stdX = int(input("Qualo valor do desvio padrão de X ?"))
+     #aplica a filtragem gaussiana
+    gaussian = cv2.GaussianBlur(img,(mascara,mascara),stdX)
+  
+  
+  #concatena a imagem original com a imagem que passou pelo processo de filtragem
+  compare = np.concatenate((img, gaussian),axis=1) 
+  #define titulo da imagem 
+  title = ('Imagem original x Imagem apos Filtro Gaussiano %d' %mascara)
+  #plot image
+  cv2.imshow(title , compare)
+  cv2.waitKey(0)
+  cv2.destroyAllWindows()
+  
+
 
 def menu():
   choice = ''
@@ -87,7 +131,7 @@ def menu():
                       D: Filtro de mediana 
                       E: Exibir múltiplos filtros de mediana
                       F: Filtro de média 
-                      G: 
+                      G: Filtro Gaussiano
                       H: 
                       Q: Sair
 
@@ -128,9 +172,9 @@ def menu():
       images[n] = calcMaskMedia(images[n])
       
 
-    #elif choice=="G" or choice=="g":
-      
-    
+    elif choice=="G" or choice=="g":
+      n = options(images, names, 'Qual das imagens será aplicado o filtro Gaussiano?')
+      images[n] = filterGaussian(images[n])
     
     #elif choice=="H" or choice=="h":
 
