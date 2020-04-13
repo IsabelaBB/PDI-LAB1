@@ -14,15 +14,16 @@ from utils import options, saveChanges
 import lab1
 import lab2
 
+'''
 TRABALHO EM GRUPO DE NO MÁXIMO 5 PESSOAS ENVIAR LINK PARA ACESSO A TODOS OS CÓDIGOS, 
 ARQUIVO EXECUTÁVEL E EXPLICAÇÕES NECESSÁRIAS (incluindo instruções para instalar compiladores e bibliotecas). 
 ******************************************************************* 
 Implementação em PHYTON, JAVA, C ou C++ de códigos para: 
 - Operações de filtragem espacial - FPB (média, gaussiano e mediana, com tamanho da janela e desvio padrão da guaussiana sendo
 parâmetros de entrada) - FBA (laplaciano e sobel) 
+'''
 
-
-def exibirMultiplasMaskMedia(img):
+def exibirMultiplasMaskMediana(img):
   #img = cv2.imread(image_name)  
   mascaras=[]
   median = []
@@ -43,15 +44,26 @@ def exibirMultiplasMaskMedia(img):
   
   for i in range(len(mascaras)):
     compare = np.concatenate((img, median[i]),axis=1) #side by side comparison
-    title = ('original x mascara de media %d' %mascaras[i])
+    title = ('original x mascara de mediana %d' %mascaras[i])
     cv2.imshow(title , compare)
     cv2.waitKey(0)
   cv2.destroyAllWindows()
 
-def calcMaskMediaUnico(img):
+def calcMaskMedianaUnico(img):
   mascara = int(input("Qual a mascara? ex.: 3 ou 5 ou 7 - APENAS valor ímpar > 3. \n --> "))
   #img = cv2.imread(image_name)  
   media = cv2.medianBlur(img, mascara)
+  compare = np.concatenate((img, media),axis=1) #side by side comparison
+  title = ('original x mascara de mediana %d' %mascara)
+  cv2.imshow(title , compare)
+  cv2.waitKey(0)
+  cv2.destroyAllWindows()
+  return media
+
+def calcMaskMedia(img):
+  mascara = int(input("Qual a mascara? ex.: 3 ou 5 ou 7 - APENAS valor ímpar > 3. \n --> "))
+  #img = cv2.imread(image_name)  
+  media = cv2.blur(img, (mascara,mascara))
   compare = np.concatenate((img, media),axis=1) #side by side comparison
   title = ('original x mascara de media %d' %mascara)
   cv2.imshow(title , compare)
@@ -72,9 +84,9 @@ def menu():
                       A: Carregar imagem
                       B: Exibir imagem
                       C: Salvar imagem
-                      D: Filtro de média 
-                      E: Exibir múltiplos filtros de média
-                      F: 
+                      D: Filtro de mediana 
+                      E: Exibir múltiplos filtros de mediana
+                      F: Filtro de média 
                       G: 
                       H: 
                       Q: Sair
@@ -103,23 +115,24 @@ def menu():
       lab1.saveImage(images[n])
 
     elif choice=="D" or choice=="d":
-      n = options(images, names, 'Qual das imagens será aplicado o filtro de média?')
-      images[n] = calcMaskMediaUnico(images[n])
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de mediana?')
+      images[n] = calcMaskMedianaUnico(images[n])
 
     elif choice=="E" or choice=="e":
-      n = options(images, names, 'Qual das imagens serão aplicados vários filtros de média para serem exibidos??')
-      exibirMultiplasMaskMedia(images[n])
+      n = options(images, names, 'Qual das imagens serão aplicados vários filtros de mediana para serem exibidos??')
+      exibirMultiplasMaskMediana(images[n])
 
 
     elif choice=="F" or choice=="f":
-      
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de média?')
+      images[n] = calcMaskMedia(images[n])
       
 
-    elif choice=="G" or choice=="g":
+    #elif choice=="G" or choice=="g":
       
     
     
-    elif choice=="H" or choice=="h":
+    #elif choice=="H" or choice=="h":
 
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
