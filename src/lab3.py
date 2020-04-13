@@ -174,7 +174,7 @@ def menu():
 
     elif choice=="G" or choice=="g":
       n = options(images, names, 'Qual das imagens será aplicado o filtro Gaussiano?')
-      images[n] = filterGaussian(images[n])
+      filterGaussian(images[n])
     
     #elif choice=="H" or choice=="h":
 
