@@ -15,49 +15,13 @@ import lab1
 import lab2
 import lab3
 
+'''
 TRABALHO EM GRUPO DE NO MÁXIMO 5 PESSOAS ENVIAR LINK PARA ACESSO A TODOS OS CÓDIGOS, ARQUIVO EXECUTÁVEL E EXPLICAÇÕES 
 NECESSÁRIAS (incluindo instruções para instalar compiladores e bibliotecas). 
 ******************************************************************* 
 Implementação em PHYTON, JAVA, C ou C++ de códigos para: - Operações de filtragem espacial - Filtros 
 morfológicos (erosão e dilatação, sendo que o tamanho e o formato da máscara - retangular ou cruz - são parâmetros de entrada) 
-
-
-def exibirMultiplasMaskMedia(img):
-  #img = cv2.imread(image_name)  
-  mascaras=[]
-  median = []
-  new_mask=[]
-  print("\nInstrução: aperte uma tecla para ir p/ próxima imagem. Depois que todas forem exibidas, apertar uma tecla novamente irá finalizar a execução deste código.")
-  mascaras = input("Quais as mascaras? ex.: 3 5 7 - APENAS valores ímpares > 3. \n --> ").split()
-  #mascaras  = "-1 1 3 1 5 7 8".split()
-  mascaras = list(map(int,mascaras))
-  #print(mascaras)
-  for i in mascaras:  
-    if i>=3 and i%2 != 0:
-   #   print(i)
-      new_mask.append(i)
-    mascaras = new_mask 
-  
-  for i in mascaras:  #valores impares para a mascara
-    median.append(cv2.medianBlur(img, i))
-  
-  for i in range(len(mascaras)):
-    compare = np.concatenate((img, median[i]),axis=1) #side by side comparison
-    title = ('original x mascara de media %d' %mascaras[i])
-    cv2.imshow(title , compare)
-    cv2.waitKey(0)
-  cv2.destroyAllWindows()
-
-def calcMaskMediaUnico(img):
-  mascara = int(input("Qual a mascara? ex.: 3 ou 5 ou 7 - APENAS valor ímpar > 3. \n --> "))
-  #img = cv2.imread(image_name)  
-  media = cv2.medianBlur(img, mascara)
-  compare = np.concatenate((img, media),axis=1) #side by side comparison
-  title = ('original x mascara de media %d' %mascara)
-  cv2.imshow(title , compare)
-  cv2.waitKey(0)
-  cv2.destroyAllWindows()
-  return media
+'''
 
 def menu():
   choice = ''
@@ -72,8 +36,8 @@ def menu():
                       A: Carregar imagem
                       B: Exibir imagem
                       C: Salvar imagem
-                      D: Filtro de média 
-                      E: Exibir múltiplos filtros de média
+                      D: Filtro morfológico de erosão 
+                      E: Filtro morfológico de dilatação
                       F: 
                       G: 
                       H: 
@@ -103,12 +67,22 @@ def menu():
       lab1.saveImage(images[n])
 
     elif choice=="D" or choice=="d":
-      n = options(images, names, 'Qual das imagens será aplicado o filtro de média?')
-      images[n] = calcMaskMediaUnico(images[n])
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de erosão?')
+      mask = int(input("Qual o tamanho da máscara? ex.: 5 - vai ser uma máscara 5x5 \n -->"))
+      mask = (mask, mask)
+      tipo = -1
+      tipo = int(input("Qual o formato da máscara? 0: retangular; 1: elíptica; 2:cruz. \n -->"))
+      
+      images[n] = erosao(images[n], mask, tipo)
 
     elif choice=="E" or choice=="e":
-      n = options(images, names, 'Qual das imagens serão aplicados vários filtros de média para serem exibidos??')
-      exibirMultiplasMaskMedia(images[n])
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
+      mask = int(input("Qual o tamanho da máscara? ex.: 5 - vai ser uma máscara 5x5 \n -->"))
+      mask = (mask, mask)
+      tipo = -1
+      tipo = int(input("Qual o formato da máscara? 0: retangular; 1: elíptica; 2:cruz. \n -->"))
+      
+      images[n] = erosao(images[n], mask, tipo)
 
 
     elif choice=="F" or choice=="f":
