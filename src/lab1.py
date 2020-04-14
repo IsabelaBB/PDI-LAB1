@@ -60,6 +60,8 @@ def viewImages(images, titles=['image']):
       plt.imshow(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
     else: # imagem está em escala de cinza
       plt.imshow(image, cmap='gray')
+    plt.axis('off')
+    plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0.01, hspace=0.01)
     i = i + 1
   
   plt.show()
@@ -75,6 +77,9 @@ def viewImage(image, title='image'):
   else:
     # imagem está em escala de cinza
     plt.imshow(image, cmap='gray')
+  
+  plt.axis('off')
+  plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0.01, hspace=0.01)
 
   plt.title(title)
   plt.show()
@@ -304,13 +309,15 @@ def menu():
                       I: Binarizar
                       Q: Sair
 
-                      Opção: """)
+                      Imagens no sistema: %s
+
+                      Opção: """ % str(names))
 
     if choice=="Q" or choice=="q":
         sys.exit
 
     elif choice == "A" or choice =="a":
-      n = options(images, names, 'Qual das imagens deseja sobrescrever?')
+      n = 1 - options(images, names, 'Qual das imagens deseja sobrescrever?')
       images[n], names[n] = loadImage()
 
     elif images[0] is None and images[1] is None:
@@ -319,8 +326,12 @@ def menu():
       input()
       
     elif choice == "B" or choice =="b":
-      n = options(images, names, 'Qual das imagens deseja visualizar?')
-      viewImage(images[n], names[n])
+      if images[1] is None:
+        viewImage(images[0], names[0])
+      elif images[0] is None:
+        viewImage(images[1], names[1])
+      else:
+        viewImages(images, names)
       
 
     elif choice == "C" or choice =="c":

@@ -23,12 +23,12 @@ def options(images, names, msg):
   opt = ''
   if images[0] is not None and images[1] is not None:
     opt = input(msg + ' A:'+names[0]+' B:'+names[1]+' :')
-  if images[0] is not None or opt == 'A' or opt == 'a':
+  if images[1] is None or opt == 'A' or opt == 'a':
       return 0
-  elif images[1] is not None or opt == 'B' or opt == 'b':
+  elif images[0] is None or opt == 'B' or opt == 'b':
       return 1 
   else: 
-    return 0
+    return 1
 
 
 
@@ -47,7 +47,8 @@ def options_bkp(images, names, function, args):
 
 # opção de manter no sistema as modificações feitas
 def saveChanges(image, imageChanged):
-  opt = input('Deseja salvar a alteração? Y:sim  N:não   :')
+  print()
+  opt = input('Deseja guardar a alteração? Y:sim  N:não   :')
   if opt == 'Y' or opt == 'y':
     return imageChanged
   else:

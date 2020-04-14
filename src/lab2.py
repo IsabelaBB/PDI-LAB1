@@ -309,13 +309,15 @@ def menu():
                       H: Binarização de Imagem
                       Q: Sair
 
-                      Opção: """)
+                      Imagens no sistema: %s
+
+                      Opção: """ % str(names))
 
     if choice=="Q" or choice=="q":
         sys.exit
 
     elif choice == "A" or choice =="a":
-      n = options(images, names, 'Qual das imagens deseja sobrescrever?')
+      n = 1 - options(images, names, 'Qual das imagens deseja sobrescrever?')
       images[n], names[n] = lab1.loadImage()
 
     elif images[0] is None and images[1] is None:
@@ -324,8 +326,12 @@ def menu():
       input()
       
     elif choice == "B" or choice =="b":
-      n = options(images, names, 'Qual das imagens deseja visualizar?')
-      lab1.viewImage(images[n], names[n])
+      if images[1] is None:
+        lab1.viewImage(images[0], names[0])
+      elif images[0] is None:
+        lab1.viewImage(images[1], names[1])
+      else:
+        lab1.viewImages(images, names)
       
 
     elif choice == "C" or choice =="c":
