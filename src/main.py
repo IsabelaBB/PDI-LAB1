@@ -12,6 +12,7 @@ from skimage.measure import compare_ssim
 import lab1
 from utils import options, saveChanges
 import lab2
+import lab3
 
 
 def menu():
@@ -42,6 +43,7 @@ def menu():
                       P: Filtro de Média 
                       R: Filtro Gaussiano
                       S: Filtro Sobel
+                      T: Filtro Laplaciano
 
                       Q: Sair
 
@@ -170,8 +172,38 @@ def menu():
       images[n] = lab2.trans_potencia(images[n])
 
     
+    elif choice=="N" or choice=="n":
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de mediana?')
+      images[n] = lab3.calcMaskMedianaUnico(images[n])
+
+
+    elif choice=="O" or choice=="o":
+      n = options(images, names, 'Qual das imagens serão aplicados vários filtros de mediana para serem exibidos??')
+      lab3.exibirMultiplasMaskMediana(images[n])
+
+
+    elif choice=="P" or choice=="p":
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de Média?')
+      images[n] = lab3.calcMaskMedia(images[n])
+      
+
+    elif choice=="R" or choice=="r":
+      n = options(images, names, 'Qual das imagens será aplicado o filtro Gaussiano?')
+      images[n] = lab3.filterGaussian(images[n])
+    
+
+    elif choice=="S" or choice=="s":
+      n = options(images, names, 'Qual das imagens será aplicado o filtro Sobel?')
+      images[n] = lab3.sobel(images[n])
+
+
+    elif choice=="T" or choice=="t":
+      n = options(images, names, 'Qual das imagens será aplicado o filtro Laplaciano?')
+      images[n] = lab3.laplaciano(images[n])
+
+
     else:
-      print("You must only select either A,B,C,D,E,F,G or Q.")
+      print("You must only select A to T.")
       print("Please try again")
 
 

@@ -24,6 +24,7 @@ Implementação em PHYTON, JAVA, C ou C++ de códigos para:
 parâmetros de entrada) - FBA (laplaciano e sobel) 
 '''
 
+
 def exibirMultiplasMaskMediana(img):
   #img = cv2.imread(image_name)  
   mascaras=[]
@@ -50,6 +51,7 @@ def exibirMultiplasMaskMediana(img):
     cv2.waitKey(0)
   cv2.destroyAllWindows()
 
+
 def calcMaskMedianaUnico(img):
   mascara = int(input("Qual a mascara? ex.: 3 ou 5 ou 7 - APENAS valor ímpar > 3. \n --> "))
   #img = cv2.imread(image_name)  
@@ -59,7 +61,8 @@ def calcMaskMedianaUnico(img):
   cv2.imshow(title , compare)
   cv2.waitKey(0)
   cv2.destroyAllWindows()
-  return saveChanges(image, mediana)
+  return saveChanges(img, mediana)
+
 
 def calcMaskMedia(img):
   mascara = int(input("Qual a mascara? ex.: 3 ou 5 ou 7 - APENAS valor ímpar > 3. \n --> "))
@@ -72,6 +75,7 @@ def calcMaskMedia(img):
   cv2.destroyAllWindows()
   return media
   
+
 def filterGaussian(img):
   
   '''
@@ -154,6 +158,7 @@ def sobel(img):
 
   return saveChanges(img,grad_trunc)
 
+
 def laplaciano(img):
   
   #se imagem for colorida, converte para escala gray
@@ -193,6 +198,7 @@ def laplaciano(img):
   images = np.vstack([resultado3,resultado5, resultado7])
   return saveChanges(img,images)
 
+
 def menu():
   choice = ''
   images = [None , None]
@@ -211,6 +217,7 @@ def menu():
                       F: Filtro de Média 
                       G: Filtro Gaussiano
                       H: Filtro Sobel
+                      I: Filtro Laplaciano
                       Q: Sair
 
                       Imagens no sistema: %s
@@ -275,7 +282,7 @@ def menu():
       images[n] = laplaciano(images[n])
       
     else:
-      print("You must only select either A,B,C,D,E,F,G, H, I or Q.")
+      print("You must only select A to I or Q.")
       print("Please try again")
 
 

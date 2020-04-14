@@ -398,7 +398,7 @@ def menu():
       if value > 0 and value < 255:
         images[n] = binarizar(images[n], value)
     else:
-      print("You must only select either A,B,C,D,E,F,G or Q.")
+      print("You must only select A to I or Q.")
       print("Please try again")
 
 

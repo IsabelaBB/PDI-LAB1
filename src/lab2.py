@@ -378,7 +378,7 @@ def menu():
     
 
     else:
-      print("You must only select either A,B,C,D,E,F,G or Q.")
+      print("You must only select either A,B,C,D,E,F,G,H or Q.")
       print("Please try again")
 
 
