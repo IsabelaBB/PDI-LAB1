@@ -41,10 +41,10 @@ def exibirMultiplasMaskMediana(img):
     mascaras = new_mask 
   
   for i in mascaras:  #valores impares para a mascara
-    median.append(cv2.medianBlur(img, i))
+    mediana.append(cv2.medianBlur(img, i))
   
   for i in range(len(mascaras)):
-    compare = np.concatenate((img, median[i]),axis=1) #side by side comparison
+    compare = np.concatenate((img, mediana[i]),axis=1) #side by side comparison
     title = ('original x mascara de mediana %d' %mascaras[i])
     cv2.imshow(title , compare)
     cv2.waitKey(0)
@@ -53,13 +53,13 @@ def exibirMultiplasMaskMediana(img):
 def calcMaskMedianaUnico(img):
   mascara = int(input("Qual a mascara? ex.: 3 ou 5 ou 7 - APENAS valor ímpar > 3. \n --> "))
   #img = cv2.imread(image_name)  
-  media = cv2.medianBlur(img, mascara)
-  compare = np.concatenate((img, media),axis=1) #side by side comparison
+  mediana = cv2.medianBlur(img, mascara)
+  compare = np.concatenate((img, mediana),axis=1) #side by side comparison
   title = ('original x mascara de mediana %d' %mascara)
   cv2.imshow(title , compare)
   cv2.waitKey(0)
   cv2.destroyAllWindows()
-  return media
+  return saveChanges(image, mediana)
 
 def calcMaskMedia(img):
   mascara = int(input("Qual a mascara? ex.: 3 ou 5 ou 7 - APENAS valor ímpar > 3. \n --> "))
