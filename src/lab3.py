@@ -154,7 +154,44 @@ def sobel(img):
 
   return saveChanges(img,grad_trunc)
 
+def laplaciano(img):
+  
+  #se imagem for colorida, converte para escala gray
+  if len(img.shape) > 2:
+    imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+  #aplica o filtro
+  kernel = 3  #dimensoes da mascara
+  resultado3 = cv2.Laplacian(imgGray, cv2.CV_64F, ksize=kernel)
+
+  #converte para unsigned int de 8 bits
+  resultado3 = np.uint8(np.absolute(resultado3))
+
+
+  #aplica o filtro
+  kernel = 5
+  resultado5 = cv2.Laplacian(imgGray, cv2.CV_64F, ksize=kernel)
+
+  #converte para unsigned int de 8 bits
+  resultado5 = np.uint8(np.absolute(resultado5))
+  
+  
+  #aplica o filtro
+  kernel = 7
+  resultado7 = cv2.Laplacian(imgGray, cv2.CV_64F, ksize=kernel)
+
+  #converte para unsigned int de 8 bits
+  resultado7 = np.uint8(np.absolute(resultado7))
+
+
+  #exibe a imagem original e a resultado
+  lab1.viewImages([imgGray, resultado3,resultado5, resultado7], ['Imagem(gray)',
+                                                                 'Laplaciano 3x3',
+                                                                 'Laplaciano 5x5',
+                                                                 'Laplaciano 7x7'])
+  #empilha as imagens resultado
+  images = np.vstack([resultado3,resultado5, resultado7])
+  return saveChanges(img,images)
 
 def menu():
   choice = ''
@@ -233,9 +270,12 @@ def menu():
       n = options(images, names, 'Qual das imagens será aplicado o filtro Sobel?')
       images[n] = sobel(images[n])
 
-
+    elif choice=="I" or choice=="i":
+      n = options(images, names, 'Qual das imagens será aplicado o filtro Laplaciano?')
+      images[n] = laplaciano(images[n])
+      
     else:
-      print("You must only select either A,B,C,D,E,F,G or Q.")
+      print("You must only select either A,B,C,D,E,F,G, H, I or Q.")
       print("Please try again")
 
 
