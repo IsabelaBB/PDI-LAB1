@@ -28,7 +28,7 @@ parâmetros de entrada) - FBA (laplaciano e sobel)
 def exibirMultiplasMaskMediana(img):
   #img = cv2.imread(image_name)  
   mascaras=[]
-  median = []
+  mediana = []
   new_mask=[]
   print("\nInstrução: aperte uma tecla para ir p/ próxima imagem. Depois que todas forem exibidas, apertar uma tecla novamente irá finalizar a execução deste código.")
   mascaras = input("Quais as mascaras? ex.: 3 5 7 - APENAS valores ímpares > 3. \n --> ").split()
