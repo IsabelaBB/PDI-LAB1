@@ -23,6 +23,66 @@ Implementação em PHYTON, JAVA, C ou C++ de códigos para: - Operações de fil
 morfológicos (erosão e dilatação, sendo que o tamanho e o formato da máscara - retangular ou cruz - são parâmetros de entrada) 
 '''
 
+import cv2
+import numpy as np
+
+
+def erosao(image, mask, tipo):
+  #print("tipo: ", tipo)
+  kernel = None
+  while(tipo < 0 or tipo > 2):
+    if tipo == 0:
+      # Rectangular Kernel
+      kernel = cv2.getStructuringElement(cv2.MORPH_RECT,mask)
+    elif tipo == 1:
+      # Elliptical Kernel
+      kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,mask)
+    elif tipo == 2:
+      # Cross-shaped Kernel
+      kernel = cv2.getStructuringElement(cv2.MORPH_CROSS,mask)
+    else:
+      print("Tipo inválido !")
+      tipo = int(input("Qual o formato da máscara? 0: retangular; 1: elíptica; 2:cruz. \n -->"))
+  
+  erosion = cv2.erode(image,kernel,iterations = 1)
+
+  title = ('original x erosao [clique nesta janela e aperte uma tecla para sair]')
+  compare = np.concatenate((image, erosion),axis=1)
+  cv2.imshow(title , compare)
+  cv2.waitKey(0)
+  cv2.destroyAllWindows()
+
+  return saveChanges(image, erosion)
+
+
+def dilatar(image, mask, tipo):
+  kernel = None
+  while(tipo < 0 or tipo > 2):
+    if tipo == 0:
+      # Rectangular Kernel
+      kernel = cv2.getStructuringElement(cv2.MORPH_RECT,mask)
+    elif tipo == 1:
+      # Elliptical Kernel
+      kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,mask)
+    elif tipo == 2:
+      # Cross-shaped Kernel
+      kernel = cv2.getStructuringElement(cv2.MORPH_CROSS,mask)
+    else:
+      print("Tipo inválido !")
+      tipo = int(input("Qual o formato da máscara? 0: retangular; 1: elíptica; 2:cruz. \n -->"))
+
+  dilation = cv2.dilate(image,kernel,iterations = 1)
+
+  title = ('original x dilatacao [clique nesta janela e aperte uma tecla para sair]')
+  compare = np.concatenate((image, dilation),axis=1)
+  cv2.imshow(title , compare)
+  cv2.waitKey(0)
+  cv2.destroyAllWindows()
+
+  return saveChanges(image, dilation)
+
+
+
 def menu():
   choice = ''
   images = [None , None]
@@ -67,34 +127,37 @@ def menu():
       lab1.saveImage(images[n])
 
     elif choice=="D" or choice=="d":
+      
       n = options(images, names, 'Qual das imagens será aplicado o filtro de erosão?')
+      print("Erosão\n")
       mask = int(input("Qual o tamanho da máscara? ex.: 5 - vai ser uma máscara 5x5 \n -->"))
       mask = (mask, mask)
       tipo = -1
       tipo = int(input("Qual o formato da máscara? 0: retangular; 1: elíptica; 2:cruz. \n -->"))
-      
       images[n] = erosao(images[n], mask, tipo)
 
     elif choice=="E" or choice=="e":
       n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
+      print("Dilatação\n")
       mask = int(input("Qual o tamanho da máscara? ex.: 5 - vai ser uma máscara 5x5 \n -->"))
       mask = (mask, mask)
       tipo = -1
       tipo = int(input("Qual o formato da máscara? 0: retangular; 1: elíptica; 2:cruz. \n -->"))
       
-      images[n] = erosao(images[n], mask, tipo)
+      images[n] = dilatar(images[n], mask, tipo)
 
 
     elif choice=="F" or choice=="f":
-      
-      
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
+
 
     elif choice=="G" or choice=="g":
-      
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
     
     
     elif choice=="H" or choice=="h":
-
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
+      
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
       print("Please try again")
