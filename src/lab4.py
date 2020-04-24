@@ -172,6 +172,27 @@ def kirsch(image):
   # exibe as imagens
   lab1.viewImages([image, grad], ['Imagem original', 'Kirsch valores absolutos'])
   return saveChanges(image,grad)
+
+def laplaciano (image):
+  
+  '''
+    Input: image
+  '''
+  
+  # converte a imagem para cinza, se ela ja não for
+  if len(image.shape) > 2:
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+  else:
+    gray = image
+  
+  # remove ruídos
+  gray = cv2.GaussianBlur(gray,(3,3),0)
+  
+  # aplica filtro
+  laplaciano = cv2.Laplacian(gray,cv2.CV_8U)
+  
+  lab1.viewImages([image, laplaciano], ['Imagem original', 'Laplaciano'])
+  return saveChanges(image,laplaciano)
   
 def sobel(image,size = 3):
   
@@ -211,6 +232,7 @@ def menu():
                       F: Filtro Prewitt
                       G: Filtro Kirsch
                       H: Filtro de Sobel
+                      I: Filtro Laplaciano
                       Q: Sair
 
                       Imagens no sistema: %s
@@ -274,6 +296,10 @@ def menu():
     elif choice=="H" or choice=="h":
       n = options(images, names, 'Qual das imagens será aplicado o filtro de Sobel?')
       images[n] = sobel(images[n])
+      
+    elif choice=="I" or choice=="i":
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de Laplaciano?')
+      images[n] = laplaciano(images[n])
       
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
