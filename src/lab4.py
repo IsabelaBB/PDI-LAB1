@@ -172,8 +172,26 @@ def kirsch(image):
   # exibe as imagens
   lab1.viewImages([image, grad], ['Imagem original', 'Kirsch valores absolutos'])
   return saveChanges(image,grad)
+  
+def sobel(image,size = 3):
+  
+  '''
+    Inputs: image
+            size: tamanho do kernel Sobel estendido; deve ser 1, 3, 5 ou 7
+  '''
+  
+  # converte a imagem para cinza, se ela ja não for
+  if len(image.shape) > 2:
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+  else:
+    gray = image
+  
+  sobelx = cv2.Sobel(gray,cv2.CV_8U,1,0,ksize=size)
+  sobely = cv2.Sobel(gray,cv2.CV_8U,0,1,ksize=size)
+  image_sobel = sobelx + sobely
 
-
+  lab1.viewImages([image, image_sobel], ['Imagem original', 'Sobel'])
+  return saveChanges(image,image_sobel)
 
 def menu():
   choice = ''
@@ -192,7 +210,7 @@ def menu():
                       E: Filtro morfológico de dilatação
                       F: Filtro Prewitt
                       G: Filtro Kirsch
-                      H: 
+                      H: Filtro de Sobel
                       Q: Sair
 
                       Imagens no sistema: %s
@@ -254,7 +272,8 @@ def menu():
       images[n] = kirsch(images[n])
     
     elif choice=="H" or choice=="h":
-      n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de Sobel?')
+      images[n] = sobel(images[n])
       
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
