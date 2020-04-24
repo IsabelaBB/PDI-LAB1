@@ -19,8 +19,9 @@ import lab3
 TRABALHO EM GRUPO DE NO MÁXIMO 5 PESSOAS ENVIAR LINK PARA ACESSO A TODOS OS CÓDIGOS, ARQUIVO EXECUTÁVEL E EXPLICAÇÕES 
 NECESSÁRIAS (incluindo instruções para instalar compiladores e bibliotecas). 
 ******************************************************************* 
-Implementação em PHYTON, JAVA, C ou C++ de códigos para: - Operações de filtragem espacial - Filtros 
-morfológicos (erosão e dilatação, sendo que o tamanho e o formato da máscara - retangular ou cruz - são parâmetros de entrada) 
+Implementação em PHYTON, JAVA, C ou C++ de códigos para: 
+- Operações de filtragem espacial 
+- Filtros morfológicos (erosão e dilatação, sendo que o tamanho e o formato da máscara - retangular ou cruz - são parâmetros de entrada) 
 '''
 
 import cv2
@@ -82,6 +83,36 @@ def dilatar(image, mask, tipo):
   return saveChanges(image, dilation)
 
 
+def prewitt(image):
+  # converte a imagem para cinza, se ela ja não for
+  if len(image.shape) > 2:
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+  else:
+    gray = image
+
+  # cria as máscaras
+  kernelx = np.array([[1,1,1],[0,0,0],[-1,-1,-1]])
+  kernely = np.array([[-1,0,1],[-1,0,1],[-1,0,1]])
+
+  # aplica o filtro prewitt nas direcoes x e y
+  grad_x = cv2.filter2D(gray, -1, kernelx)
+  grad_y = cv2.filter2D(gray, -1, kernely)
+
+  print(grad_x)
+
+  # o resultado de cada mascara do filtro possui valores float
+  # pega o valor absoluto dos pixels resultantes do gradiente na direcao x e y
+  abs_grad_x = cv2.convertScaleAbs(grad_x)
+  abs_grad_y = cv2.convertScaleAbs(grad_y)
+  
+  # cv2.addWeighted(src1, alpha, src2, beta, gamma) -> src1 * alpha + src2 * beta + gamma
+  # faz a soma dos grdientes x e y
+  grad = cv2.addWeighted(grad_x, 0.5, grad_y, 0.5, 0) # gradiente com valores float. Os valores são deslocados para serem 8b
+  
+  # exibe as imagens
+  lab1.viewImages([image, grad], ['Imagem original', 'Prewitt valores absolutos'])
+  return saveChanges(image,grad)
+
 
 def menu():
   choice = ''
@@ -98,18 +129,20 @@ def menu():
                       C: Salvar imagem
                       D: Filtro morfológico de erosão 
                       E: Filtro morfológico de dilatação
-                      F: 
+                      F: Filtro Prewitt
                       G: 
                       H: 
                       Q: Sair
 
-                      Opção: """)
+                      Imagens no sistema: %s
+
+                      Opção: """ % str(names))
 
     if choice=="Q" or choice=="q":
         sys.exit
 
     elif choice == "A" or choice =="a":
-      n = options(images, names, 'Qual das imagens deseja sobrescrever?')
+      n = 1 - options(images, names, 'Qual das imagens deseja sobrescrever?')
       images[n], names[n] = lab1.loadImage()
 
     elif images[0] is None and images[1] is None:
@@ -118,8 +151,12 @@ def menu():
       input()
       
     elif choice == "B" or choice =="b":
-      n = options(images, names, 'Qual das imagens deseja visualizar?')
-      lab1.viewImage(images[n], names[n])
+      if images[1] is None:
+        lab1.viewImage(images[0], names[0])
+      elif images[0] is None:
+        lab1.viewImage(images[1], names[1])
+      else:
+        lab1.viewImages(images, names)
       
 
     elif choice == "C" or choice =="c":
@@ -149,7 +186,7 @@ def menu():
 
     elif choice=="F" or choice=="f":
       n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
-
+      images[n] = prewitt(images[n])
 
     elif choice=="G" or choice=="g":
       n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
