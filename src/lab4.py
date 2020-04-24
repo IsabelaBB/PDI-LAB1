@@ -24,9 +24,6 @@ Implementação em PHYTON, JAVA, C ou C++ de códigos para:
 - Filtros morfológicos (erosão e dilatação, sendo que o tamanho e o formato da máscara - retangular ou cruz - são parâmetros de entrada) 
 '''
 
-import cv2
-import numpy as np
-
 
 def erosao(image, mask, tipo):
   #print("tipo: ", tipo)
@@ -91,14 +88,12 @@ def prewitt(image):
     gray = image
 
   # cria as máscaras
-  kernelx = np.array([[1,1,1],[0,0,0],[-1,-1,-1]])
-  kernely = np.array([[-1,0,1],[-1,0,1],[-1,0,1]])
+  kernelx = np.array([[1,1,1],[0,0,0],[-1,-1,-1]], dtype=np.float32)
+  kernely = np.array([[-1,0,1],[-1,0,1],[-1,0,1]], dtype=np.float32)
 
   # aplica o filtro prewitt nas direcoes x e y
   grad_x = cv2.filter2D(gray, -1, kernelx)
   grad_y = cv2.filter2D(gray, -1, kernely)
-
-  print(grad_x)
 
   # o resultado de cada mascara do filtro possui valores float
   # pega o valor absoluto dos pixels resultantes do gradiente na direcao x e y
@@ -108,10 +103,76 @@ def prewitt(image):
   # cv2.addWeighted(src1, alpha, src2, beta, gamma) -> src1 * alpha + src2 * beta + gamma
   # faz a soma dos grdientes x e y
   grad = cv2.addWeighted(grad_x, 0.5, grad_y, 0.5, 0) # gradiente com valores float. Os valores são deslocados para serem 8b
-  
+
   # exibe as imagens
   lab1.viewImages([image, grad], ['Imagem original', 'Prewitt valores absolutos'])
   return saveChanges(image,grad)
+
+
+def kirsch(image):
+  # converte a imagem para cinza, se ela ja não for
+  if len(image.shape) > 2:
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+  else:
+    gray = image
+
+  # cria as 8 máscaras
+  kernelG1 = np.array([[ 5, -3, -3],
+                      [ 5,  0, -3],
+                      [ 5, -3, -3]], dtype=np.float32)
+
+  kernelG2 = np.array([[-3, -3, -3],
+                      [ 5,  0, -3],
+                      [ 5,  5, -3]], dtype=np.float32)
+
+  kernelG3 = np.array([[-3, -3, -3],
+                      [-3,  0, -3],
+                      [ 5,  5, 5]], dtype=np.float32)
+
+  kernelG4 = np.array([[-3, -3, -3],
+                      [-3,  0,  5],
+                      [-3,  5,  5]], dtype=np.float32)
+
+  kernelG5 = np.array([[-3, -3, 5],
+                      [-3,  0, 5],
+                      [-3, -3, 5]], dtype=np.float32)
+
+  kernelG6 = np.array([[-3,  5,  5],
+                      [-3,  0,  5],
+                      [-3, -3, -3]], dtype=np.float32)
+
+  kernelG7 = np.array([[ 5,  5,  5],
+                      [-3,  0, -3],
+                      [-3, -3, -3]], dtype=np.float32)
+
+  kernelG8 = np.array([[ 5,  5, -3],
+                      [ 5,  0, -3],
+                      [-3, -3, -3]], dtype=np.float32)
+
+  # aplica as 8 máscaras do filtro kirsc
+  norm = cv2.NORM_MINMAX
+  g1 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG1), None, 0, 255, norm, cv2.CV_8UC1)
+  g2 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG2), None, 0, 255, norm, cv2.CV_8UC1)
+  g3 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG3), None, 0, 255, norm, cv2.CV_8UC1)
+  g4 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG4), None, 0, 255, norm, cv2.CV_8UC1)
+  g5 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG5), None, 0, 255, norm, cv2.CV_8UC1)
+  g6 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG6), None, 0, 255, norm, cv2.CV_8UC1)
+  g7 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG7), None, 0, 255, norm, cv2.CV_8UC1)
+  g8 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG8), None, 0, 255, norm, cv2.CV_8UC1)
+
+  # pega os valores máximos de cada resultado
+  grad = cv2.max(g1, g2)
+  grad = cv2.max(grad, g3)
+  grad = cv2.max(grad, g4)
+  grad = cv2.max(grad, g5)
+  grad = cv2.max(grad, g6)
+  grad = cv2.max(grad, g7)
+  grad = cv2.max(grad, g8)
+  
+  # exibe as imagens
+  lab1.viewImages([image, grad], ['Imagem original', 'Kirsch valores absolutos'])
+  return saveChanges(image,grad)
+
 
 
 def menu():
@@ -130,7 +191,7 @@ def menu():
                       D: Filtro morfológico de erosão 
                       E: Filtro morfológico de dilatação
                       F: Filtro Prewitt
-                      G: 
+                      G: Filtro Kirsch
                       H: 
                       Q: Sair
 
@@ -190,7 +251,7 @@ def menu():
 
     elif choice=="G" or choice=="g":
       n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
-    
+      images[n] = kirsch(images[n])
     
     elif choice=="H" or choice=="h":
       n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
