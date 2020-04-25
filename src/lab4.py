@@ -173,46 +173,27 @@ def kirsch(image):
   lab1.viewImages([image, grad], ['Imagem original', 'Kirsch valores absolutos'])
   return saveChanges(image,grad)
 
-def laplaciano (image):
+def canny (image):
   
   '''
     Input: image
   '''
   
+  lowThreshold = float(input("Entre com o valor de lowThreshold: "))
+  highThreshold = float(input("Entre com o valor de highThreshold: "))
+  
   # converte a imagem para cinza, se ela ja não for
   if len(image.shape) > 2:
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
   else:
     gray = image
-  
-  # remove ruídos
-  gray = cv2.GaussianBlur(gray,(3,3),0)
   
   # aplica filtro
-  laplaciano = cv2.Laplacian(gray,cv2.CV_8U)
+  canny = cv2.Canny(gray,lowThreshold,highThreshold)
   
-  lab1.viewImages([image, laplaciano], ['Imagem original', 'Laplaciano'])
-  return saveChanges(image,laplaciano)
+  lab1.viewImages([image, canny], ['Imagem original', 'Canny'])
+  return saveChanges(image,canny)
   
-def sobel(image,size = 3):
-  
-  '''
-    Inputs: image
-            size: tamanho do kernel Sobel estendido; deve ser 1, 3, 5 ou 7
-  '''
-  
-  # converte a imagem para cinza, se ela ja não for
-  if len(image.shape) > 2:
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-  else:
-    gray = image
-  
-  sobelx = cv2.Sobel(gray,cv2.CV_8U,1,0,ksize=size)
-  sobely = cv2.Sobel(gray,cv2.CV_8U,0,1,ksize=size)
-  image_sobel = sobelx + sobely
-
-  lab1.viewImages([image, image_sobel], ['Imagem original', 'Sobel'])
-  return saveChanges(image,image_sobel)
 
 def menu():
   choice = ''
@@ -231,8 +212,7 @@ def menu():
                       E: Filtro morfológico de dilatação
                       F: Filtro Prewitt
                       G: Filtro Kirsch
-                      H: Filtro de Sobel
-                      I: Filtro Laplaciano
+                      H: Filtro de Canny
                       Q: Sair
 
                       Imagens no sistema: %s
@@ -294,12 +274,9 @@ def menu():
       images[n] = kirsch(images[n])
     
     elif choice=="H" or choice=="h":
-      n = options(images, names, 'Qual das imagens será aplicado o filtro de Sobel?')
-      images[n] = sobel(images[n])
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de Canny?')
+      images[n] = canny(images[n])
       
-    elif choice=="I" or choice=="i":
-      n = options(images, names, 'Qual das imagens será aplicado o filtro de Laplaciano?')
-      images[n] = laplaciano(images[n])
       
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
