@@ -193,6 +193,22 @@ def canny (image):
   
   lab1.viewImages([image, canny], ['Imagem original', 'Canny'])
   return saveChanges(image,canny)
+
+def bilateral (image):
+  
+  '''
+    Input: image
+  '''
+  
+  diametro    = int(input("Entre com o diâmetro: "))
+  sigma_color = float(input("Entre com o valor sigmaColor: "))
+  sigma_space = float(input("Entre com o valor sigmaSpace: "))
+  
+  # aplica filtro
+  bilat = cv2.bilateralFilter(image, diametro, sigma_color, sigma_space)
+  
+  lab1.viewImages([image, bilat], ['Imagem original', 'Filtro Bilateral'])
+  return saveChanges(image,bilat)
   
 
 def menu():
@@ -213,6 +229,7 @@ def menu():
                       F: Filtro Prewitt
                       G: Filtro Kirsch
                       H: Filtro de Canny
+                      I: Filtro bilateral
                       Q: Sair
 
                       Imagens no sistema: %s
@@ -277,6 +294,9 @@ def menu():
       n = options(images, names, 'Qual das imagens será aplicado o filtro de Canny?')
       images[n] = canny(images[n])
       
+    elif choice=="I" or choice=="i":
+      n = options(images, names, 'Qual das imagens será aplicado o filtro bilateral?')
+      images[n] = bilateral(images[n])
       
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
