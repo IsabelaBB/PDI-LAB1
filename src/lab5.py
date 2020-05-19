@@ -41,7 +41,8 @@ def houghLinhas (image,threshold):
   #  - Parametro teta (theta)
   #  - Limiar
   lines = cv2.HoughLines(edges,1,np.pi/180,threshold)
-  
+
+  #Desenhando linhas encontradas
   for i in range(0, len(lines)):
     rho = lines[i][0][0]
     theta = lines[i][0][1]
@@ -53,15 +54,61 @@ def houghLinhas (image,threshold):
     pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
     cv2.line(output, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
 
+  #visualizacao do resultado
   lab1.viewImages([img, output], ['Imagem original', 'Transformada de Hough'])
   return saveChanges(image,output)
 
+
+def houghCirculos(image,minRadius,maxRadius):
+
+  output = np.copy(image)
+
+  #escala de cinza
+  gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+  #suavizacao para reduzir ruido e
+  #diminuir deteccao de ciruculos falsos
+  gray = cv2.medianBlur(gray, 5)    
+    
+  rows = gray.shape[0]
+
+  #Aplicação da transformada
+  #  - Imagem em tonsde cinza
+  #  - Metodo de deteccao
+  #  - 
+  #  - Distancia minima entre os centros
+  #  - Limiar superior
+  #  - Limiar para detecacao de centro
+  #  - Raio minimo
+  #  - Raio maximo
+  circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, rows / 8,
+                               param1=100, param2=30,
+                               minRadius=minRadius,
+                               maxRadius=maxRadius)
+
+  #Desenhando circulos encontrados
+  if circles is not None:
+
+    circles = np.uint16(np.around(circles))
+
+    for i in circles[0, :]:
+      center = (i[0], i[1])
+      # circle center
+      cv2.circle(output, center, 1, (0, 100, 100), 3)
+      # circle outline
+      radius = i[2]
+      cv2.circle(output, center, radius, (255, 0, 255), 3)
+
+  #visualizacao do resultado
+  lab1.viewImages([image, output], ['Imagem original', 'Transformada de Hough'])
+  return saveChanges(image,output)
+  
 def menu():
   choice = ''
   images = [None , None]
   names = ['', '']
 
-  while(choice is not 'Q' and choice is not 'q'):
+  while(choice != 'Q' and choice != 'q'):
     print("************MENU**************")
     #time.sleep(1)
     print()
@@ -105,6 +152,7 @@ def menu():
     elif choice=="D" or choice=="d":
       
       n = options(images, names, 'Qual das imagens será aplicado o filtro de erosão?')
+
     elif choice=="E" or choice=="e":
       n = options(images, names, 'Qual das imagens será aplicado a Transformada de Hough?')
       print("Transformada de Hough(linhas)\n")
@@ -113,7 +161,11 @@ def menu():
 
 
     elif choice=="F" or choice=="f":
-      n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
+      n = options(images, names, 'Qual das imagens será aplicado a Transformada de Hough?')
+      print("Transformada de Hough(circulos)\n")
+      raioMin = int(input("Qual o valor do raio minimo? (recomendado: 1)"))
+      raioMax = int(input("Qual o valor do raio maximo? (recomendado: 50)"))
+      images[n] = houghCirculos(images[n], raioMin, raioMax)
 
     elif choice=="G" or choice=="g":
       n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')    
