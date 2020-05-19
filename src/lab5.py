@@ -17,200 +17,44 @@ import lab3
 import lab4
 
 '''
-TRABALHO EM GRUPO DE NO MÁXIMO 5 PESSOAS ENVIAR LINK PARA ACESSO A TODOS OS CÓDIGOS, ARQUIVO EXECUTÁVEL E EXPLICAÇÕES 
-NECESSÁRIAS (incluindo instruções para instalar compiladores e bibliotecas). 
-******************************************************************* 
-Implementação em PHYTON, JAVA, C ou C++ de códigos para: 
-- Operações de filtragem espacial 
-- Filtros morfológicos (erosão e dilatação, sendo que o tamanho e o formato da máscara - retangular ou cruz - são parâmetros de entrada) 
+TRABALHO EM GRUPO DE NO MÁXIMO 5 PESSOAS ENVIAR LINK PARA ACESSO A TODOS OS CÓDIGOS,
+ARQUIVO EXECUTÁVEL E EXPLICAÇÕES NECESSÁRIAS (incluindo instruções para instalar compiladores e bibliotecas).
+*******************************************************************
+Implementação em PHYTON, JAVA, C ou C++ de códigos para:
+- Segmentação de imagens:
+  - Detecção de descontinuidades seguida de limiarização
+  - Transformada de Hough (linhas e círculos)
+  - K-means para segmentação de imagens coloridas e em tons de cinza
 '''
 
+def houghLinhas (image,threshold):
 
-def erosao(image, mask, tipo):
-  #print("tipo: ", tipo)
-  kernel = None
-  while(tipo < 0 or tipo > 2):
-    if tipo == 0:
-      # Rectangular Kernel
-      kernel = cv2.getStructuringElement(cv2.MORPH_RECT,mask)
-    elif tipo == 1:
-      # Elliptical Kernel
-      kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,mask)
-    elif tipo == 2:
-      # Cross-shaped Kernel
-      kernel = cv2.getStructuringElement(cv2.MORPH_CROSS,mask)
-    else:
-      print("Tipo inválido !")
-      tipo = int(input("Qual o formato da máscara? 0: retangular; 1: elíptica; 2:cruz. \n -->"))
+  img = np.copy(image)
   
-  erosion = cv2.erode(image,kernel,iterations = 1)
+  #Detecção das bordas usando detector Canny
+  edges = cv2.Canny(image,50,200,apertureSize = 3)
+  output = cv2.cvtColor(edges,cv2.COLOR_GRAY2BGR)
 
-  title = ('original x erosao [clique nesta janela e aperte uma tecla para sair]')
-  compare = np.concatenate((image, erosion),axis=1)
-  cv2.imshow(title , compare)
-  cv2.waitKey(0)
-  cv2.destroyAllWindows()
-
-  return saveChanges(image, erosion)
-
-
-def dilatar(image, mask, tipo):
-  kernel = None
-  while(tipo < 0 or tipo > 2):
-    if tipo == 0:
-      # Rectangular Kernel
-      kernel = cv2.getStructuringElement(cv2.MORPH_RECT,mask)
-    elif tipo == 1:
-      # Elliptical Kernel
-      kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,mask)
-    elif tipo == 2:
-      # Cross-shaped Kernel
-      kernel = cv2.getStructuringElement(cv2.MORPH_CROSS,mask)
-    else:
-      print("Tipo inválido !")
-      tipo = int(input("Qual o formato da máscara? 0: retangular; 1: elíptica; 2:cruz. \n -->"))
-
-  dilation = cv2.dilate(image,kernel,iterations = 1)
-
-  title = ('original x dilatacao [clique nesta janela e aperte uma tecla para sair]')
-  compare = np.concatenate((image, dilation),axis=1)
-  cv2.imshow(title , compare)
-  cv2.waitKey(0)
-  cv2.destroyAllWindows()
-
-  return saveChanges(image, dilation)
-
-
-def prewitt(image):
-  # converte a imagem para cinza, se ela ja não for
-  if len(image.shape) > 2:
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-  else:
-    gray = image
-
-  # cria as máscaras
-  kernelx = np.array([[1,1,1],[0,0,0],[-1,-1,-1]], dtype=np.float32)
-  kernely = np.array([[-1,0,1],[-1,0,1],[-1,0,1]], dtype=np.float32)
-
-  # aplica o filtro prewitt nas direcoes x e y
-  grad_x = cv2.filter2D(gray, -1, kernelx)
-  grad_y = cv2.filter2D(gray, -1, kernely)
-
-  # o resultado de cada mascara do filtro possui valores float
-  # pega o valor absoluto dos pixels resultantes do gradiente na direcao x e y
-  abs_grad_x = cv2.convertScaleAbs(grad_x)
-  abs_grad_y = cv2.convertScaleAbs(grad_y)
+  #Aplicação da transformada
+  #  - Saída do detector de bordas
+  #  - Parametro rô (rho)
+  #  - Parametro teta (theta)
+  #  - Limiar
+  lines = cv2.HoughLines(edges,1,np.pi/180,threshold)
   
-  # cv2.addWeighted(src1, alpha, src2, beta, gamma) -> src1 * alpha + src2 * beta + gamma
-  # faz a soma dos grdientes x e y
-  grad = cv2.addWeighted(grad_x, 0.5, grad_y, 0.5, 0) # gradiente com valores float. Os valores são deslocados para serem 8b
+  for i in range(0, len(lines)):
+    rho = lines[i][0][0]
+    theta = lines[i][0][1]
+    a = math.cos(theta)
+    b = math.sin(theta)
+    x0 = a * rho
+    y0 = b * rho
+    pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
+    pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
+    cv2.line(output, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
 
-  # exibe as imagens
-  lab1.viewImages([image, grad], ['Imagem original', 'Prewitt valores absolutos'])
-  return saveChanges(image,grad)
-
-
-def kirsch(image):
-  # converte a imagem para cinza, se ela ja não for
-  if len(image.shape) > 2:
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-  else:
-    gray = image
-
-  # cria as 8 máscaras
-  kernelG1 = np.array([[ 5, -3, -3],
-                      [ 5,  0, -3],
-                      [ 5, -3, -3]], dtype=np.float32)
-
-  kernelG2 = np.array([[-3, -3, -3],
-                      [ 5,  0, -3],
-                      [ 5,  5, -3]], dtype=np.float32)
-
-  kernelG3 = np.array([[-3, -3, -3],
-                      [-3,  0, -3],
-                      [ 5,  5, 5]], dtype=np.float32)
-
-  kernelG4 = np.array([[-3, -3, -3],
-                      [-3,  0,  5],
-                      [-3,  5,  5]], dtype=np.float32)
-
-  kernelG5 = np.array([[-3, -3, 5],
-                      [-3,  0, 5],
-                      [-3, -3, 5]], dtype=np.float32)
-
-  kernelG6 = np.array([[-3,  5,  5],
-                      [-3,  0,  5],
-                      [-3, -3, -3]], dtype=np.float32)
-
-  kernelG7 = np.array([[ 5,  5,  5],
-                      [-3,  0, -3],
-                      [-3, -3, -3]], dtype=np.float32)
-
-  kernelG8 = np.array([[ 5,  5, -3],
-                      [ 5,  0, -3],
-                      [-3, -3, -3]], dtype=np.float32)
-
-  # aplica as 8 máscaras do filtro kirsc
-  norm = cv2.NORM_MINMAX
-  g1 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG1), None, 0, 255, norm, cv2.CV_8UC1)
-  g2 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG2), None, 0, 255, norm, cv2.CV_8UC1)
-  g3 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG3), None, 0, 255, norm, cv2.CV_8UC1)
-  g4 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG4), None, 0, 255, norm, cv2.CV_8UC1)
-  g5 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG5), None, 0, 255, norm, cv2.CV_8UC1)
-  g6 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG6), None, 0, 255, norm, cv2.CV_8UC1)
-  g7 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG7), None, 0, 255, norm, cv2.CV_8UC1)
-  g8 = cv2.normalize(cv2.filter2D(gray, cv2.CV_32F, kernelG8), None, 0, 255, norm, cv2.CV_8UC1)
-
-  # pega os valores máximos de cada resultado
-  grad = cv2.max(g1, g2)
-  grad = cv2.max(grad, g3)
-  grad = cv2.max(grad, g4)
-  grad = cv2.max(grad, g5)
-  grad = cv2.max(grad, g6)
-  grad = cv2.max(grad, g7)
-  grad = cv2.max(grad, g8)
-  
-  # exibe as imagens
-  lab1.viewImages([image, grad], ['Imagem original', 'Kirsch valores absolutos'])
-  return saveChanges(image,grad)
-
-def canny (image):
-  
-  '''
-    Input: image
-  '''
-  
-  lowThreshold = float(input("Entre com o valor de lowThreshold: "))
-  highThreshold = float(input("Entre com o valor de highThreshold: "))
-  
-  # converte a imagem para cinza, se ela ja não for
-  if len(image.shape) > 2:
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-  else:
-    gray = image
-  
-  # aplica filtro
-  canny = cv2.Canny(gray,lowThreshold,highThreshold)
-  
-  lab1.viewImages([image, canny], ['Imagem original', 'Canny'])
-  return saveChanges(image,canny)
-
-def bilateral (image):
-  
-  '''
-    Input: image
-  '''
-  
-  diametro    = int(input("Entre com o diâmetro: "))
-  sigma_color = float(input("Entre com o valor sigmaColor: "))
-  sigma_space = float(input("Entre com o valor sigmaSpace: "))
-  
-  # aplica filtro
-  bilat = cv2.bilateralFilter(image, diametro, sigma_color, sigma_space)
-  
-  lab1.viewImages([image, bilat], ['Imagem original', 'Filtro Bilateral'])
-  return saveChanges(image,bilat)
-  
+  lab1.viewImages([img, output], ['Imagem original', 'Transformada de Hough'])
+  return saveChanges(image,output)
 
 def menu():
   choice = ''
@@ -225,12 +69,10 @@ def menu():
                       A: Carregar imagem
                       B: Exibir imagem
                       C: Salvar imagem
-                      D: Filtro morfológico de erosão 
-                      E: Filtro morfológico de dilatação
-                      F: Filtro Prewitt
-                      G: Filtro Kirsch
-                      H: Filtro de Canny
-                      I: Filtro bilateral
+                      D: Detecção de descontinuidades e limiarização 
+                      E: Transformada de Hough (linhas)
+                      F: Transformada de Hough (círculos)
+                      G: K-means
                       Q: Sair
                       Imagens no sistema: %s
                       Opção: """ % str(names))
@@ -263,39 +105,23 @@ def menu():
     elif choice=="D" or choice=="d":
       
       n = options(images, names, 'Qual das imagens será aplicado o filtro de erosão?')
-      print("Erosão\n")
-      mask = int(input("Qual o tamanho da máscara? ex.: 5 - vai ser uma máscara 5x5 \n -->"))
-      mask = (mask, mask)
-      tipo = -1
-      tipo = int(input("Qual o formato da máscara? 0: retangular; 1: elíptica; 2:cruz. \n -->"))
-      images[n] = erosao(images[n], mask, tipo)
-
     elif choice=="E" or choice=="e":
-      n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
-      print("Dilatação\n")
-      mask = int(input("Qual o tamanho da máscara? ex.: 5 - vai ser uma máscara 5x5 \n -->"))
-      mask = (mask, mask)
-      tipo = -1
-      tipo = int(input("Qual o formato da máscara? 0: retangular; 1: elíptica; 2:cruz. \n -->"))
-      
-      images[n] = dilatar(images[n], mask, tipo)
+      n = options(images, names, 'Qual das imagens será aplicado a Transformada de Hough?')
+      print("Transformada de Hough(linhas)\n")
+      limiar = int(input("Qual o valor do limiar?"))
+      images[n] = houghLinhas(images[n],limiar)
 
 
     elif choice=="F" or choice=="f":
       n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
-      images[n] = prewitt(images[n])
 
     elif choice=="G" or choice=="g":
-      n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')
-      images[n] = kirsch(images[n])
-    
+      n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')    
     elif choice=="H" or choice=="h":
       n = options(images, names, 'Qual das imagens será aplicado o filtro de Canny?')
-      images[n] = canny(images[n])
       
     elif choice=="I" or choice=="i":
       n = options(images, names, 'Qual das imagens será aplicado o filtro bilateral?')
-      images[n] = bilateral(images[n])
       
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
