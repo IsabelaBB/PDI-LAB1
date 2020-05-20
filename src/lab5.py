@@ -33,7 +33,6 @@ def houghLinhas (image,threshold):
   
   #Detecção das bordas usando detector Canny
   edges = cv2.Canny(image,50,200,apertureSize = 3)
-  output = cv2.cvtColor(edges,cv2.COLOR_GRAY2BGR)
 
   #Aplicação da transformada
   #  - Saída do detector de bordas
@@ -52,11 +51,11 @@ def houghLinhas (image,threshold):
     y0 = b * rho
     pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
     pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-    cv2.line(output, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
+    cv2.line(image, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
 
   #visualizacao do resultado
-  lab1.viewImages([img, output], ['Imagem original', 'Transformada de Hough'])
-  return saveChanges(image,output)
+  lab1.viewImages([img, image], ['Imagem original', 'Transformada de Hough'])
+  return saveChanges(img,image)
 
 
 def houghCirculos(image,minRadius,maxRadius):
@@ -169,11 +168,6 @@ def menu():
 
     elif choice=="G" or choice=="g":
       n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')    
-    elif choice=="H" or choice=="h":
-      n = options(images, names, 'Qual das imagens será aplicado o filtro de Canny?')
-      
-    elif choice=="I" or choice=="i":
-      n = options(images, names, 'Qual das imagens será aplicado o filtro bilateral?')
       
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
