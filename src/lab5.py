@@ -101,7 +101,8 @@ def houghCirculos(image,minRadius,maxRadius):
   #visualizacao do resultado
   lab1.viewImages([image, output], ['Imagem original', 'Transformada de Hough'])
   return saveChanges(image,output)
-  
+
+
 def menu():
   choice = ''
   images = [None , None]
@@ -116,9 +117,8 @@ def menu():
                       B: Exibir imagem
                       C: Salvar imagem
                       D: Detecção de descontinuidades e limiarização 
-                      E: Transformada de Hough (linhas)
-                      F: Transformada de Hough (círculos)
-                      G: K-means
+                      E: Transformada de Hough
+                      F: K-means
                       Q: Sair
                       Imagens no sistema: %s
                       Opção: """ % str(names))
@@ -153,21 +153,35 @@ def menu():
       n = options(images, names, 'Qual das imagens será aplicado o filtro de erosão?')
 
     elif choice=="E" or choice=="e":
-      n = options(images, names, 'Qual das imagens será aplicado a Transformada de Hough?')
-      print("Transformada de Hough(linhas)\n")
-      limiar = int(input("Qual o valor do limiar?"))
-      images[n] = houghLinhas(images[n],limiar)
+      check = False
+      while(not check):
 
+        choice = input("""
+                   Qual tranformada aplicar?
+                   Circulos(C) ou Linhas(L): """);
+        if choice == 'L' or choice == 'l' :
+          check = True
+          n = options(images, names, 'Qual das imagens será aplicado a Transformada de Hough?')
+          print("""
+                Transformada de Hough(linhas)\n""")
+          limiar = int(input("Qual o valor do limiar?"))
+          images[n] = houghLinhas(images[n],limiar)
 
+        elif choice == 'C' or choice == 'c':
+          check = True
+          n = options(images, names, 'Qual das imagens será aplicado a Transformada de Hough?')
+          print("""
+                  Transformada de Hough(circulos)\n""")
+          raioMin = int(input("Qual o valor do raio minimo? (recomendado: 1)"))
+          raioMax = int(input("Qual o valor do raio maximo? (recomendado: 50)"))
+          images[n] = houghCirculos(images[n], raioMin, raioMax)
+        else:
+          print("Opcao invalida")
+          
+      
     elif choice=="F" or choice=="f":
-      n = options(images, names, 'Qual das imagens será aplicado a Transformada de Hough?')
-      print("Transformada de Hough(circulos)\n")
-      raioMin = int(input("Qual o valor do raio minimo? (recomendado: 1)"))
-      raioMax = int(input("Qual o valor do raio maximo? (recomendado: 50)"))
-      images[n] = houghCirculos(images[n], raioMin, raioMax)
+      n = options(images, names, 'Qual das imagens será aplicado o K-Means?')
 
-    elif choice=="G" or choice=="g":
-      n = options(images, names, 'Qual das imagens será aplicado o filtro de dilatação?')    
       
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
