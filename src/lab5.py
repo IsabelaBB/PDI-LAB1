@@ -29,6 +29,12 @@ Implementação em PHYTON, JAVA, C ou C++ de códigos para:
 
 def houghLinhas (image,threshold):
 
+  #################
+  #Entradas
+  # - Imagem
+  # - Limiar
+  #################
+  
   img = np.copy(image)
   
   #Detecção das bordas usando detector Canny
@@ -60,6 +66,13 @@ def houghLinhas (image,threshold):
 
 def houghCirculos(image,minRadius,maxRadius):
 
+  #################
+  #Entradas
+  # - Imagem
+  # - Raio minimo
+  # - Raio maximo
+  #################
+  
   output = np.copy(image)
 
   #escala de cinza
@@ -102,6 +115,60 @@ def houghCirculos(image,minRadius,maxRadius):
   lab1.viewImages([image, output], ['Imagem original', 'Transformada de Hough'])
   return saveChanges(image,output)
 
+def kmeans(image,gray,K):
+
+  #######################
+  #Entradas
+  # - Imagem
+  # - Aplicar tons de cinza (sim ou não)
+  # - Numero de clusters
+  #######################
+
+  #Conversao para tons de cinza
+  if gray == True:
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+  Z = image.reshape((-1,3))
+
+  #Conversao para float32
+  Z = np.float32(Z)
+  
+  #Definicao do criterio
+  # - Tupla com:
+  #   - tipo
+  #   .   - TERM_CRITERIA_EPS
+  #   .     pare se a precisão for atingida.
+  #   .
+  #   .   - TERM_CRITERIA_MAX_ITER
+  #   .     pare se número maximo de iterações for atingido.
+  #   .
+  #   - maximo de iteracaoes
+  #   - precisão
+  criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+
+  #Aplicacao do Kmeans
+  # - Entrada
+  # - Numero de clusters
+  # - Melhores labels
+  # - Criterio
+  # - Iteracoes
+  # - Definicao dos centros iniciais
+  #
+  # Output
+  # - distance: soma da distância ao quadrado de cada ponto
+  #             até seus centros correspondentes.
+  # - label: vetor de labels
+  # - center: vetor de centros dos clusters
+  distance,label,center=cv2.kmeans(Z,K,None,criteria,10,cv2.KMEANS_RANDOM_CENTERS)
+  
+  #Conversao para uint8 novamente
+  center = np.uint8(center)
+
+  #Obtendo imagem de saida
+  output = center[label.flatten()].reshape((image.shape))
+
+  lab1.viewImages([image, output], ['Imagem de entrada', 'Kmeans'])
+  return saveChanges(image,output)
 
 def menu():
   choice = ''
@@ -181,7 +248,23 @@ def menu():
       
     elif choice=="F" or choice=="f":
       n = options(images, names, 'Qual das imagens será aplicado o K-Means?')
+      check = False
+      while(not check):
 
+        choice = input("""
+                   Deseja usar a imagem em tons de cinza?
+                   Sim(S) ou Nao(N): """);
+        if choice == 'S' or choice == 's' :
+          check = True
+          gray = True
+
+        elif choice == 'N' or choice == 'n':
+          check = True
+          gray = False
+
+      K = int(input("Numero de regioes: "))
+      
+      images[n] = kmeans(images[n],gray, K);
       
     else:
       print("You must only select either A,B,C,D,E,F,G or Q.")
