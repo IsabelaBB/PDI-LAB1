@@ -170,6 +170,34 @@ def kmeans(image,gray,K):
   lab1.viewImages([image, output], ['Imagem de entrada', 'Kmeans'])
   return saveChanges(image,output)
 
+
+def descontinuidade(image):
+  
+  #######################
+  #Entradas
+  # - Imagem
+  # - Limiar
+  #######################
+  
+  limiar = int(input("Informe o valor (positivo) do limiar: "))
+
+  #converte a imagem para a escala de cinza se for colorida
+  if len(image.shape) > 2:
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+  
+  #aplica o Filtro Laplaciano
+  image_lapaciano = cv2.Laplacian(image_gray, cv2.CV_64F, 3)
+  
+  #converte para unsigned int de 8 bits
+  image_lapaciano = np.uint8(np.absolute(image_lapaciano))
+  
+  #realiza a limiarização
+  lim, img_limiar = cv2.threshold(image_lapaciano, limiar, 255, cv2.THRESH_BINARY)
+  
+  lab1.viewImages([image, image_lapaciano, img_limiar], ['Imagem original', 'Filtro Laplaciano', 'Limiarização'])
+  
+  return saveChanges(image, image_lapaciano, img_limiar)
+
 def menu():
   choice = ''
   images = [None , None]
@@ -216,8 +244,8 @@ def menu():
       lab1.saveImage(images[n])
 
     elif choice=="D" or choice=="d":
-      
-      n = options(images, names, 'Qual das imagens será aplicado o filtro de erosão?')
+      n = options(images, names, 'Qual das imagens será aplicada detecção de descontinuidades e limiarização?')
+      images[n] = descontinuidade(images[n])
 
     elif choice=="E" or choice=="e":
       check = False
