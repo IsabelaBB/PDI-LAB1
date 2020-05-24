@@ -186,17 +186,17 @@ def descontinuidade(image):
     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
   
   #aplica o Filtro Laplaciano
-  image_lapaciano = cv2.Laplacian(image_gray, cv2.CV_64F, 3)
+  image_laplaciano = cv2.Laplacian(image_gray, cv2.CV_64F, 3)
   
   #converte para unsigned int de 8 bits
-  image_lapaciano = np.uint8(np.absolute(image_lapaciano))
+  image_laplaciano = np.uint8(np.absolute(image_laplaciano))
   
   #realiza a limiarização
-  lim, img_limiar = cv2.threshold(image_lapaciano, limiar, 255, cv2.THRESH_BINARY)
+  lim, img_limiar = cv2.threshold(image_laplaciano, limiar, 255, cv2.THRESH_BINARY)
   
-  lab1.viewImages([image, image_lapaciano, img_limiar], ['Imagem original', 'Filtro Laplaciano', 'Limiarização'])
+  lab1.viewImages([image, image_laplaciano, img_limiar], ['Imagem original', 'Filtro Laplaciano', 'Limiarização'])
   
-  return saveChanges(image, image_lapaciano, img_limiar)
+  return saveChanges(image, image_laplaciano, img_limiar)
 
 def menu():
   choice = ''
